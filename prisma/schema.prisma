@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum VenueStatus {
+  available
+  maintenance
+  inactive
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+  refunded
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Venue {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.VarChar(150)
+  location    String         @db.VarChar(255)
+  capacity    Int
+  facilities  String?        @db.Text
+  pricePerDay Decimal        @db.Decimal(12, 2) @map("price_per_day")
+  status      VenueStatus    @default(available)
+  description String?        @db.Text
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  bookings    EventBooking[]
+
+  @@map("venues")
+}
+
+model EventBooking {
+  id            Int           @id @default(autoincrement())
+  venueId       Int           @map("venue_id")
+  eventName     String        @db.VarChar(150) @map("event_name")
+  organizerName String        @db.VarChar(100) @map("organizer_name")
+  eventDate     DateTime      @db.Date @map("event_date")
+  startTime     DateTime      @db.Time(6) @map("start_time")
+  endTime       DateTime      @db.Time(6) @map("end_time")
+  attendees     Int?
+  bookingStatus BookingStatus @default(pending) @map("booking_status")
+  paymentStatus PaymentStatus @default(unpaid) @map("payment_status")
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Restrict)
+
+  @@map("event_bookings")
+}
