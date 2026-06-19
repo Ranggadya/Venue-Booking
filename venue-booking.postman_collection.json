@@ -1,0 +1,1406 @@
+{
+  "info": {
+    "name": "Smart Venue & Event Booking Management",
+    "description": "API collection untuk testing Smart Venue & Event Booking Management.\n\n## Setup\n1. Import collection ini ke Postman\n2. Set variable `base_url` = `http://localhost:3000`\n3. Jalankan request **[Auth] Login** → copy nilai `access_token`\n4. Set variable `token` = nilai `access_token`\n5. Semua request lain sudah otomatis menggunakan token tersebut\n\n## Demo Account\n- Email: admin@venue.com\n- Password: admin123",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL aplikasi. Ganti sesuai environment."
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token. Diisi setelah login berhasil."
+    },
+    {
+      "key": "venue_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID venue untuk testing. Ganti sesuai data yang ada."
+    },
+    {
+      "key": "booking_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID booking untuk testing. Ganti sesuai data yang ada."
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Endpoint autentikasi. Login untuk mendapatkan JWT token.",
+      "item": [
+        {
+          "name": "[Auth] Login — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Otomatis simpan token ke collection variable setelah login",
+                  "if (pm.response.code === 200) {",
+                  "  const response = pm.response.json();",
+                  "  if (response.access_token) {",
+                  "    pm.collectionVariables.set('token', response.access_token);",
+                  "    console.log('✅ Token saved to collection variable');",
+                  "  }",
+                  "}",
+                  "",
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has access_token', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('access_token');",
+                  "  pm.expect(json.access_token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@venue.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login dengan akun admin untuk mendapatkan JWT Bearer token.\n\nSetelah request berhasil, token akan otomatis tersimpan ke collection variable `token` melalui test script."
+          }
+        },
+        {
+          "name": "[Auth] Login — Wrong Password (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Response has error message', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('message');",
+                  "  pm.expect(json.statusCode).to.equal(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@venue.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test login dengan password salah. Expected: 401 Unauthorized."
+          }
+        },
+        {
+          "name": "[Auth] Login — Invalid Email Format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response has validation error', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bukan-email\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test login dengan format email tidak valid. Expected: 400 Bad Request dari ValidationPipe."
+          }
+        },
+        {
+          "name": "[Auth] Access Protected Route — No Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"]
+            },
+            "description": "Test akses endpoint tanpa Bearer token. Expected: 401 Unauthorized."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏛️ Venues",
+      "description": "CRUD endpoint untuk manajemen venue. Semua request memerlukan JWT Bearer token.",
+      "item": [
+        {
+          "name": "[Venues] GET All Venues",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Each venue has required fields', () => {",
+                  "  const json = pm.response.json();",
+                  "  if (json.length > 0) {",
+                  "    const venue = json[0];",
+                  "    pm.expect(venue).to.have.property('id');",
+                  "    pm.expect(venue).to.have.property('name');",
+                  "    pm.expect(venue).to.have.property('location');",
+                  "    pm.expect(venue).to.have.property('capacity');",
+                  "    pm.expect(venue).to.have.property('status');",
+                  "    pm.expect(venue).to.have.property('pricePerDay');",
+                  "    // Simpan ID venue pertama untuk test lain",
+                  "    pm.collectionVariables.set('venue_id', venue.id);",
+                  "    console.log('venue_id set to:', venue.id);",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"]
+            },
+            "description": "Ambil semua data venue. Response berupa array of venue objects."
+          }
+        },
+        {
+          "name": "[Venues] GET All Venues — Search by Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Search results contain keyword', () => {",
+                  "  const json = pm.response.json();",
+                  "  json.forEach(venue => {",
+                  "    const match =",
+                  "      venue.name.toLowerCase().includes('aula') ||",
+                  "      venue.location.toLowerCase().includes('aula') ||",
+                  "      venue.status.toLowerCase().includes('aula');",
+                  "    pm.expect(match).to.be.true;",
+                  "  });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues?search=aula",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "aula",
+                  "description": "Keyword pencarian (nama, lokasi, atau status)"
+                }
+              ]
+            },
+            "description": "Cari venue berdasarkan keyword. Search mencakup nama, lokasi, dan status."
+          }
+        },
+        {
+          "name": "[Venues] GET All Venues — Search by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues?search=available",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "available"
+                }
+              ]
+            },
+            "description": "Cari venue berdasarkan status. Coba juga: maintenance, inactive."
+          }
+        },
+        {
+          "name": "[Venues] GET Venue by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has venue data with bookings', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json).to.have.property('name');",
+                  "  pm.expect(json).to.have.property('bookings');",
+                  "  pm.expect(json.bookings).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{venue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "{{venue_id}}"]
+            },
+            "description": "Ambil detail venue beserta list booking terkait. Response menyertakan array `bookings`."
+          }
+        },
+        {
+          "name": "[Venues] GET Venue by ID — Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Response has error message', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(404);",
+                  "  pm.expect(json.message).to.include('tidak ditemukan');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/99999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "99999"]
+            },
+            "description": "Test get venue dengan ID yang tidak ada. Expected: 404 Not Found."
+          }
+        },
+        {
+          "name": "[Venues] POST Create Venue — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has created venue data', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json.name).to.equal('Ruang Training Center');",
+                  "  pm.expect(json.status).to.equal('available');",
+                  "  // Simpan ID untuk keperluan test update/delete",
+                  "  pm.collectionVariables.set('venue_id', json.id);",
+                  "  console.log('New venue_id:', json.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ruang Training Center\",\n  \"location\": \"Gedung E Lt. 2\",\n  \"capacity\": 75,\n  \"facilities\": \"AC, Proyektor, Whiteboard, Internet\",\n  \"price_per_day\": 1200000,\n  \"status\": \"available\",\n  \"description\": \"Ruang khusus untuk training dan pendidikan.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"]
+            },
+            "description": "Buat venue baru. Semua field wajib kecuali `facilities` dan `description`."
+          }
+        },
+        {
+          "name": "[Venues] POST Create Venue — Validation Error (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response has validation message', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  pm.expect(json).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"location\": \"\",\n  \"capacity\": -5,\n  \"price_per_day\": -1000,\n  \"status\": \"invalid_status\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"]
+            },
+            "description": "Test create venue dengan data tidak valid. Expected: 400 Bad Request dengan pesan validasi."
+          }
+        },
+        {
+          "name": "[Venues] PATCH Update Venue — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Venue data updated', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.name).to.equal('Ruang Training Center — Updated');",
+                  "  pm.expect(json.capacity).to.equal(80);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ruang Training Center — Updated\",\n  \"capacity\": 80,\n  \"price_per_day\": 1500000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{venue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "{{venue_id}}"]
+            },
+            "description": "Update sebagian data venue. Hanya field yang dikirim yang akan diupdate (partial update)."
+          }
+        },
+        {
+          "name": "[Venues] PATCH Update Venue Status — Maintenance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"maintenance\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{venue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "{{venue_id}}"]
+            },
+            "description": "Ubah status venue menjadi maintenance. Venue dengan status ini tidak bisa menerima booking baru."
+          }
+        },
+        {
+          "name": "[Venues] DELETE Venue — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success message', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('message');",
+                  "  pm.expect(json.message).to.include('berhasil dihapus');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{venue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "{{venue_id}}"]
+            },
+            "description": "Hapus venue. Akan gagal (400) jika venue masih memiliki booking aktif (pending/confirmed)."
+          }
+        },
+        {
+          "name": "[Venues] DELETE Venue — Has Active Bookings (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response mentions active bookings', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  pm.expect(json.message).to.include('booking aktif');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues", "1"]
+            },
+            "description": "Test delete venue yang masih punya booking aktif (Aula Utama, ID 1). Expected: 400 Bad Request.\n\nGanti ID sesuai venue yang memiliki booking pending/confirmed di database kamu."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Event Bookings",
+      "description": "CRUD endpoint untuk manajemen event booking. Semua request memerlukan JWT Bearer token.",
+      "item": [
+        {
+          "name": "[Bookings] GET All Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Each booking has venue relation', () => {",
+                  "  const json = pm.response.json();",
+                  "  if (json.length > 0) {",
+                  "    pm.expect(json[0]).to.have.property('venue');",
+                  "    pm.expect(json[0].venue).to.have.property('name');",
+                  "    // Simpan ID booking pertama",
+                  "    pm.collectionVariables.set('booking_id', json[0].id);",
+                  "    console.log('booking_id set to:', json[0].id);",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Ambil semua data booking. Response menyertakan relasi venue (include: { venue: true })."
+          }
+        },
+        {
+          "name": "[Bookings] GET All Bookings — Search by Event Name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings?search=seminar",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "seminar"
+                }
+              ]
+            },
+            "description": "Cari booking berdasarkan nama event."
+          }
+        },
+        {
+          "name": "[Bookings] GET All Bookings — Search by Venue Name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings?search=ballroom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "ballroom"
+                }
+              ]
+            },
+            "description": "Cari booking berdasarkan nama venue. Search via relasi Prisma (nested where)."
+          }
+        },
+        {
+          "name": "[Bookings] GET All Bookings — Search by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings?search=confirmed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "confirmed"
+                }
+              ]
+            },
+            "description": "Cari booking berdasarkan booking_status. Coba juga: pending, cancelled, paid, unpaid, refunded."
+          }
+        },
+        {
+          "name": "[Bookings] GET Booking by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has booking with venue info', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json).to.have.property('eventName');",
+                  "  pm.expect(json).to.have.property('venue');",
+                  "  pm.expect(json.venue).to.have.property('name');",
+                  "  pm.expect(json.venue).to.have.property('capacity');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "{{booking_id}}"]
+            },
+            "description": "Ambil detail booking beserta informasi venue terkait."
+          }
+        },
+        {
+          "name": "[Bookings] GET Booking by ID — Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/99999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "99999"]
+            },
+            "description": "Test get booking dengan ID tidak ada. Expected: 404 Not Found."
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has booking data', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json.eventName).to.equal('Test Event Baru');",
+                  "  pm.expect(json.bookingStatus).to.equal('pending');",
+                  "  // Simpan ID untuk test lain",
+                  "  pm.collectionVariables.set('booking_id', json.id);",
+                  "  console.log('New booking_id:', json.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 2,\n  \"event_name\": \"Test Event Baru\",\n  \"organizer_name\": \"Testing Organization\",\n  \"event_date\": \"2026-09-01\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 50,\n  \"booking_status\": \"pending\",\n  \"payment_status\": \"unpaid\",\n  \"notes\": \"Ini adalah booking untuk testing Postman.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Buat booking baru.\n\n**Field wajib:** venue_id, event_name, organizer_name, event_date, start_time, end_time\n**Field opsional:** attendees, booking_status, payment_status, notes\n\nFormat: event_date = YYYY-MM-DD, start_time/end_time = HH:MM"
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Venue Not Available (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response mentions venue status', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  const msg = json.message.toLowerCase();",
+                  "  pm.expect(msg).to.satisfy(m =>",
+                  "    m.includes('maintenance') || m.includes('inactive') || m.includes('tidak dapat')",
+                  "  );",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 5,\n  \"event_name\": \"Event di Venue Maintenance\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-10\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test booking ke venue yang berstatus maintenance (Ruang Workshop, ID 5). Expected: 400 Bad Request.\n\nGanti venue_id sesuai ID venue maintenance di database kamu."
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Exceeds Capacity (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response mentions capacity', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  pm.expect(json.message.toLowerCase()).to.include('kapasitas');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 4,\n  \"event_name\": \"Event Melebihi Kapasitas\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 999\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test booking dengan jumlah peserta melebihi kapasitas venue.\n\nMeeting Room Eksekutif (ID 4) kapasitas 20 orang, kita kirim 999 peserta. Expected: 400 Bad Request."
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Invalid Time (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response mentions time validation', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  pm.expect(json.message.toLowerCase()).to.include('waktu');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 2,\n  \"event_name\": \"Event Waktu Salah\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-20\",\n  \"start_time\": \"14:00\",\n  \"end_time\": \"09:00\",\n  \"attendees\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test booking dengan end_time lebih kecil dari start_time (14:00 → 09:00). Expected: 400 Bad Request."
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Schedule Conflict (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Response mentions schedule conflict', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(409);",
+                  "  pm.expect(json.error).to.equal('Conflict');",
+                  "  pm.expect(json.message.toLowerCase()).to.include('bentrok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 1,\n  \"event_name\": \"Event Bentrok\",\n  \"organizer_name\": \"Test Conflict Organizer\",\n  \"event_date\": \"2026-06-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"11:00\",\n  \"attendees\": 100\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test booking yang jadwalnya bertabrakan dengan booking yang sudah ada.\n\nAula Utama (ID 1) pada 2026-06-15 sudah ada booking 08:00–12:00. Kita coba booking 09:00–11:00 di venue dan tanggal yang sama. Expected: 409 Conflict.\n\nLogika overlap: start_baru(09:00) < end_lama(12:00) AND end_baru(11:00) > start_lama(08:00) → BENTROK."
+          }
+        },
+        {
+          "name": "[Bookings] POST Create Booking — Venue Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 99999,\n  \"event_name\": \"Event Venue Tidak Ada\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-25\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test booking dengan venue_id yang tidak ada. Expected: 404 Not Found."
+          }
+        },
+        {
+          "name": "[Bookings] PATCH Update Booking — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Booking data updated', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.bookingStatus).to.equal('confirmed');",
+                  "  pm.expect(json.paymentStatus).to.equal('paid');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_status\": \"confirmed\",\n  \"payment_status\": \"paid\",\n  \"notes\": \"Booking sudah dikonfirmasi dan pembayaran lunas.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "{{booking_id}}"]
+            },
+            "description": "Update sebagian data booking. Partial update — hanya field yang dikirim yang berubah.\n\nUmum dipakai untuk mengubah status booking atau status pembayaran."
+          }
+        },
+        {
+          "name": "[Bookings] PATCH Update Booking — Cancel Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_status\": \"cancelled\",\n  \"payment_status\": \"refunded\",\n  \"notes\": \"Dibatalkan oleh penyelenggara. Dana dikembalikan.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "{{booking_id}}"]
+            },
+            "description": "Batalkan booking dan set payment status menjadi refunded.\n\nBooking yang sudah cancelled tidak akan dianggap conflict saat ada booking baru di jadwal yang sama."
+          }
+        },
+        {
+          "name": "[Bookings] PATCH Update Booking — Change Schedule (No Conflict)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_date\": \"2026-10-01\",\n  \"start_time\": \"10:00\",\n  \"end_time\": \"14:00\",\n  \"attendees\": 45\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "{{booking_id}}"]
+            },
+            "description": "Update jadwal booking ke tanggal dan waktu baru yang tidak bentrok dengan booking lain.\n\nSaat update, sistem mengecualikan booking ini sendiri dari pengecekan conflict (menggunakan excludeId)."
+          }
+        },
+        {
+          "name": "[Bookings] DELETE Booking — Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success message', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('message');",
+                  "  pm.expect(json.message).to.include('berhasil dihapus');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings", "{{booking_id}}"]
+            },
+            "description": "Hapus booking. Booking bisa dihapus kapan saja tanpa syarat status."
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Error Scenarios",
+      "description": "Kumpulan test case untuk skenario error penting yang perlu didemonstrasikan.",
+      "item": [
+        {
+          "name": "[Error] No Bearer Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Akses endpoint tanpa token. Expected: 401 Unauthorized."
+          }
+        },
+        {
+          "name": "[Error] Invalid Bearer Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer token.palsu.disini"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "venues"]
+            },
+            "description": "Akses endpoint dengan token tidak valid. Expected: 401 Unauthorized."
+          }
+        },
+        {
+          "name": "[Error] Booking Conflict — Overlap Detection (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test('Conflict error details are informative', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(409);",
+                  "  pm.expect(json.error).to.equal('Conflict');",
+                  "  // Pesan harus menyebut nama booking yang konflik",
+                  "  pm.expect(json.message).to.be.a('string').and.have.length.greaterThan(10);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": 3,\n  \"event_name\": \"Acara Bentrok Ballroom\",\n  \"organizer_name\": \"Conflict Tester\",\n  \"event_date\": \"2026-06-28\",\n  \"start_time\": \"19:00\",\n  \"end_time\": \"21:00\",\n  \"attendees\": 200\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test conflict detection.\n\nBallroom Grand (ID 3) pada 2026-06-28 sudah ada booking 18:00–23:00 (Gala Dinner). Kita coba booking 19:00–21:00 di tanggal yang sama.\n\nLogika: start_baru(19:00) < end_lama(23:00) AND end_baru(21:00) > start_lama(18:00) → BENTROK\n\nExpected: 409 Conflict dengan pesan yang menyebut nama booking konflik."
+          }
+        },
+        {
+          "name": "[Error] Missing Required Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response has validation error', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.statusCode).to.equal(400);",
+                  "  pm.expect(json).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-bookings"]
+            },
+            "description": "Test kirim body kosong ke endpoint create booking. ValidationPipe akan menolak karena field wajib tidak ada. Expected: 400 Bad Request."
+          }
+        }
+      ]
+    }
+  ]
+}

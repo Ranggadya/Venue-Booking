@@ -118,7 +118,7 @@ export class VenuesService {
   async remove(id: number) {
     await this.findOne(id);
 
-    // Cek apakah venue masih punya booking aktif
+    // Cek apakah venue masih punya booking aktif (pending/confirmed)
     const activeBookingCount = await this.prisma.eventBooking.count({
       where: {
         venueId: id,
@@ -134,7 +134,16 @@ export class VenuesService {
       );
     }
 
+    // Hapus semua booking yang sudah cancelled terlebih dahulu
+    // agar tidak terkena constraint onDelete: Restrict di database
+    await this.prisma.eventBooking.deleteMany({
+      where: {
+        venueId: id,
+        bookingStatus: BookingStatus.cancelled,
+      },
+    });
+
     await this.prisma.venue.delete({ where: { id } });
-    return { message: 'Venue berhasil di hapus' };
+    return { message: 'Venue berhasil dihapus' };
   }
 }

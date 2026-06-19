@@ -122,6 +122,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return `/event-bookings/${bookingUpdateMatch[1]}/edit`;
     }
 
+    const bookingDeleteMatch = url.match(/^\/event-bookings\/(\d+)\/delete$/);
+    if (bookingDeleteMatch) {
+      return `/event-bookings/${bookingDeleteMatch[1]}`;
+    }
+
     if (url === '/venues') {
       return '/venues/create';
     }
@@ -129,6 +134,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const venueUpdateMatch = url.match(/^\/venues\/(\d+)\/update$/);
     if (venueUpdateMatch) {
       return `/venues/${venueUpdateMatch[1]}/edit`;
+    }
+
+    const venueDeleteMatch = url.match(/^\/venues\/(\d+)\/delete$/);
+    if (venueDeleteMatch) {
+      return '/venues';
     }
 
     return null;

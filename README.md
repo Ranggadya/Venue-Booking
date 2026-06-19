@@ -34,7 +34,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Login Page
 
-![Login Page](./public/Business%20and%20Finance%20_%20Business%20and%20Finance%2C%20Communication%2C%20Error%20and%20404%2C%20Vector%20illustration.svg)
+![Login Page](./public/login.png)
 
 > Halaman login admin dengan form email dan password. Tampilan dua kolom dengan visual panel di kiri (desktop) dan form di kanan.
 
@@ -115,6 +115,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 ## ERD (Entity Relationship Diagram)
 
 > ERD dibuat menggunakan [dbdiagram.io](https://dbdiagram.io)
+![Edit Booking](./public/erd.svg)
 
 ### Relasi Utama
 
@@ -123,50 +124,6 @@ Venue (1) ──────────────────< EventBooking (
 ```
 
 Satu venue dapat memiliki banyak event booking. Satu event booking hanya menggunakan satu venue. Foreign key berada di tabel `event_bookings` melalui field `venue_id`.
-
-### Schema untuk dbdiagram.io
-
-Copy-paste kode berikut ke [dbdiagram.io](https://dbdiagram.io) untuk generate diagram:
-
-```
-Table users {
-  id         int          [pk, increment]
-  name       varchar(100) [not null]
-  email      varchar(100) [unique, not null]
-  password   varchar(255) [not null]
-  created_at timestamp    [not null, default: `now()`]
-  updated_at timestamp    [not null]
-}
-
-Table venues {
-  id           int            [pk, increment]
-  name         varchar(150)   [not null]
-  location     varchar(255)   [not null]
-  capacity     int            [not null]
-  facilities   text           [null]
-  price_per_day decimal(12,2) [not null]
-  status       varchar(20)    [not null, default: 'available', note: 'available | maintenance | inactive']
-  description  text           [null]
-  created_at   timestamp      [not null, default: `now()`]
-  updated_at   timestamp      [not null]
-}
-
-Table event_bookings {
-  id             int          [pk, increment]
-  venue_id       int          [not null, ref: > venues.id]
-  event_name     varchar(150) [not null]
-  organizer_name varchar(100) [not null]
-  event_date     date         [not null]
-  start_time     time         [not null]
-  end_time       time         [not null]
-  attendees      int          [null]
-  booking_status varchar(20)  [not null, default: 'pending', note: 'pending | confirmed | cancelled']
-  payment_status varchar(20)  [not null, default: 'unpaid', note: 'unpaid | paid | refunded']
-  notes          text         [null]
-  created_at     timestamp    [not null, default: `now()`]
-  updated_at     timestamp    [not null]
-}
-```
 
 ---
 
@@ -228,7 +185,7 @@ Table event_bookings {
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### Authentication
 - Login dan logout admin
