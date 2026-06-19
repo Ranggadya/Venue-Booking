@@ -13,7 +13,7 @@ export class VenuesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(search?: string) {
-    return this.prisma.venue.findMany({
+    const venues = await this.prisma.venue.findMany({
       where: search
         ? {
             OR: [
@@ -34,7 +34,24 @@ export class VenuesService {
         _count: {
           select: { bookings: true },
         },
+        bookings: {
+          where: {
+            bookingStatus: {
+              in: [BookingStatus.pending, BookingStatus.confirmed],
+            },
+          },
+          select: { id: true },
+        },
       },
+    });
+
+    return venues.map((venue) => {
+      const { bookings, ...venueData } = venue;
+
+      return {
+        ...venueData,
+        activeBookingCount: bookings.length,
+      };
     });
   }
 

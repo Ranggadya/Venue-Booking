@@ -1,100 +1,137 @@
-<div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" aria-hidden="true">
-  <div class="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" data-confirm-cancel></div>
-  <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-    <div class="mb-4 flex items-start gap-3">
-      <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
-        <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+<dialog id="deleteDialog"
+  class="w-[calc(100%-2rem)] max-w-sm rounded-2xl p-0 backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm">
+  <div class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10">
+    <div class="px-6 pb-5 pt-6 text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 ring-8 ring-red-50/60">
+        <svg class="h-7 w-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
         </svg>
       </div>
-      <div>
-        <h2 id="confirmModalTitle" class="text-base font-bold text-gray-900">Konfirmasi aksi</h2>
-        <p id="confirmModalMessage" class="mt-1 text-sm leading-relaxed text-gray-500">Apakah kamu yakin ingin melanjutkan?</p>
-      </div>
+
+      <h2 id="deleteDialogTitle" class="mt-5 text-xl font-bold text-gray-900">
+        Hapus data?
+      </h2>
+      <p id="deleteDialogMessage" class="mx-auto mt-2 max-w-xs text-sm leading-6 text-gray-500">
+        Data yang dihapus tidak dapat dikembalikan.
+      </p>
     </div>
 
-    <div class="flex justify-end gap-2 pt-2">
-      <button type="button" data-confirm-cancel
-        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-slate-50">
+    <div class="flex gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+      <button type="button" id="deleteDialogCancel"
+        class="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200">
         Batal
       </button>
-      <button type="button" id="confirmModalSubmit"
-        class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700">
+
+      <button type="button" id="deleteDialogConfirm"
+        class="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-100">
         Hapus
       </button>
     </div>
   </div>
-</div>
+</dialog>
 
 <script>
-(function () {
-  var modal = document.getElementById('confirmModal');
-  var title = document.getElementById('confirmModalTitle');
-  var message = document.getElementById('confirmModalMessage');
-  var submitButton = document.getElementById('confirmModalSubmit');
-  if (!modal || !title || !message || !submitButton) return;
+  (function () {
+    var dialog = document.getElementById('deleteDialog');
+    var title = document.getElementById('deleteDialogTitle');
+    var message = document.getElementById('deleteDialogMessage');
+    var cancelButton = document.getElementById('deleteDialogCancel');
+    var confirmButton = document.getElementById('deleteDialogConfirm');
 
-  var pendingForm = null;
-  var nativeSubmit = HTMLFormElement.prototype.submit;
+    if (!dialog || !title || !message || !cancelButton || !confirmButton) return;
 
-  function closeModal() {
-    pendingForm = null;
-    submitButton.disabled = false;
-    submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    modal.setAttribute('aria-hidden', 'true');
-  }
+    var selectedForm = null;
+    var actionUrl = null;
+    var nativeSubmit = HTMLFormElement.prototype.submit;
 
-  function openModal(sourceForm) {
-    pendingForm = sourceForm;
-    title.textContent = sourceForm.dataset.confirmTitle || 'Konfirmasi aksi';
-    message.textContent = sourceForm.dataset.confirmMessage || 'Apakah kamu yakin ingin melanjutkan?';
-    submitButton.textContent = sourceForm.dataset.confirmLabel || 'Lanjutkan';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    modal.setAttribute('aria-hidden', 'false');
-    submitButton.focus();
-  }
-
-  document.addEventListener('click', function (event) {
-    if (!(event.target instanceof Element)) return;
-
-    var trigger = event.target.closest('form[data-confirm] button[type="submit"]');
-    if (!trigger) return;
-
-    var sourceForm = trigger.closest('form[data-confirm]');
-    if (!sourceForm) return;
-
-    event.preventDefault();
-    openModal(sourceForm);
-  });
-
-  document.addEventListener('submit', function (event) {
-    var sourceForm = event.target;
-    if (!(sourceForm instanceof HTMLFormElement) || !sourceForm.dataset.confirm) return;
-
-    event.preventDefault();
-    openModal(sourceForm);
-  });
-
-  submitButton.addEventListener('click', function () {
-    if (!pendingForm) return;
-
-    var form = pendingForm;
-    submitButton.disabled = true;
-    submitButton.classList.add('opacity-70', 'cursor-not-allowed');
-    nativeSubmit.call(form);
-  });
-
-  document.querySelectorAll('[data-confirm-cancel]').forEach(function (button) {
-    button.addEventListener('click', closeModal);
-  });
-
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
-      closeModal();
+    function setConfirmButtonMode(isBlocked) {
+      confirmButton.classList.toggle('bg-red-500', !isBlocked);
+      confirmButton.classList.toggle('hover:bg-red-600', !isBlocked);
+      confirmButton.classList.toggle('focus:ring-red-100', !isBlocked);
+      confirmButton.classList.toggle('bg-blue-500', isBlocked);
+      confirmButton.classList.toggle('hover:bg-blue-600', isBlocked);
+      confirmButton.classList.toggle('focus:ring-blue-100', isBlocked);
     }
-  });
-})();
+
+    function resetDialog() {
+      selectedForm = null;
+      actionUrl = null;
+      confirmButton.disabled = false;
+      confirmButton.classList.remove('opacity-70', 'cursor-not-allowed');
+      setConfirmButtonMode(false);
+    }
+
+    function submitSelectedForm() {
+      if (actionUrl) {
+        window.location.href = actionUrl;
+        return;
+      }
+
+      if (!selectedForm) return;
+
+      var form = selectedForm;
+
+      confirmButton.disabled = true;
+      confirmButton.classList.add('opacity-70', 'cursor-not-allowed');
+      nativeSubmit.call(form);
+    }
+
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+
+      if (!(form instanceof HTMLFormElement)) return;
+      if (!form.classList.contains('js-delete-form')) return;
+
+      event.preventDefault();
+
+      selectedForm = form;
+      actionUrl = form.dataset.deleteActionUrl || null;
+
+      title.textContent = form.dataset.deleteTitle || 'Hapus data?';
+      message.textContent = form.dataset.deleteMessage || 'Data yang dihapus tidak dapat dikembalikan.';
+      confirmButton.textContent = form.dataset.deleteLabel || 'Hapus';
+      setConfirmButtonMode(form.dataset.deleteBlocked === 'true');
+
+      if (typeof dialog.showModal !== 'function') {
+        if (form.dataset.deleteBlocked === 'true') {
+          alert(message.textContent);
+          if (actionUrl) window.location.href = actionUrl;
+          return;
+        }
+
+        if (confirm(message.textContent)) {
+          nativeSubmit.call(form);
+        }
+        return;
+      }
+
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    });
+
+    cancelButton.addEventListener('click', function () {
+      dialog.close();
+    });
+
+    confirmButton.addEventListener('click', function () {
+      submitSelectedForm();
+    });
+
+    dialog.addEventListener('click', function (event) {
+      var rect = dialog.getBoundingClientRect();
+      var clickedOutside =
+        event.clientX < rect.left ||
+        event.clientX > rect.right ||
+        event.clientY < rect.top ||
+        event.clientY > rect.bottom;
+
+      if (clickedOutside) {
+        dialog.close();
+      }
+    });
+
+    dialog.addEventListener('close', resetDialog);
+  })();
 </script>

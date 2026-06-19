@@ -3,6 +3,19 @@
   const fieldValue = function (name, fallback) {
     return form[name] !== undefined && form[name] !== null ? form[name] : fallback;
   };
+  const activeBookingsJson = JSON.stringify(
+    (typeof activeBookings !== 'undefined' ? activeBookings : []).map(function (booking) {
+      return {
+        id: booking.id,
+        venueId: booking.venueId,
+        eventName: booking.eventName,
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+        startTime: booking.startTime,
+        endTime: booking.endTime
+      };
+    })
+  ).replace(/</g, '\\u003c');
 %>
 
 <!-- Breadcrumb -->
@@ -164,21 +177,14 @@
   </div>
 </div>
 
+<script type="application/json" id="activeBookingsData"><%- activeBookingsJson %></script>
+
 <script>
 (function () {
-  var activeBookings = <%- JSON.stringify(
-    (typeof activeBookings !== 'undefined' ? activeBookings : []).map(function (booking) {
-      return {
-        id: booking.id,
-        venueId: booking.venueId,
-        eventName: booking.eventName,
-        startDate: booking.startDate,
-        endDate: booking.endDate,
-        startTime: booking.startTime,
-        endTime: booking.endTime
-      };
-    })
-  ).replace(/</g, '\\u003c') %>;
+  var activeBookingsElement = document.getElementById('activeBookingsData');
+  var activeBookings = activeBookingsElement
+    ? JSON.parse(activeBookingsElement.textContent || '[]')
+    : [];
 
   function toDateOnly(value) {
     return value ? new Date(value + 'T00:00:00.000Z') : null;
