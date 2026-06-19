@@ -1,0 +1,157 @@
+<!-- Header -->
+<div class="flex items-start justify-between mb-6">
+  <div>
+    <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
+      <span>Home</span>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span class="text-gray-700 font-medium">Venues</span>
+    </nav>
+    <h1 class="text-xl font-bold text-gray-900">Venues</h1>
+    <p class="text-xs text-gray-500 mt-0.5">Manage venue data, capacity, location, and operational status.</p>
+  </div>
+  <a href="/venues/create"
+    class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    Add Venue
+  </a>
+</div>
+
+<!-- Search -->
+<div class="bg-white rounded-2xl border border-slate-100 shadow-card p-4 mb-5">
+  <form method="GET" action="/venues">
+    <div class="flex gap-3">
+      <div class="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
+        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
+        <input type="text" name="search" value="<%= search %>"
+          placeholder="Search by name, location, or status..."
+          class="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none" />
+      </div>
+      <button type="submit"
+        class="px-4 py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-xl transition-colors">
+        Search
+      </button>
+      <% if (search) { %>
+        <a href="/venues"
+          class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-gray-600 text-sm font-medium rounded-xl transition-colors">
+          Clear
+        </a>
+      <% } %>
+    </div>
+  </form>
+</div>
+
+<!-- Table -->
+<div class="bg-white rounded-card border border-slate-100 shadow-card overflow-hidden">
+
+  <div class="px-5 py-3.5 border-b border-slate-50 flex items-center justify-between">
+    <p class="text-xs text-gray-400">
+      Showing <span class="font-semibold text-gray-700"><%= venues.length %></span> venue<%= venues.length !== 1 ? 's' : '' %>
+      <% if (search) { %> for "<span class="font-medium text-gray-600"><%= search %></span>"<% } %>
+    </p>
+  </div>
+
+  <% if (venues.length === 0) { %>
+    <div class="text-center py-16 px-4">
+      <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+        </svg>
+      </div>
+      <p class="text-sm font-semibold text-gray-600">
+        <% if (search) { %>No venues found for "<%= search %>"<% } else { %>No venues yet<% } %>
+      </p>
+      <p class="text-xs text-gray-400 mt-1 mb-4">
+        <% if (!search) { %>Add your first venue to start managing bookings.<% } %>
+      </p>
+      <% if (!search) { %>
+        <a href="/venues/create" class="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-xl transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Add Venue
+        </a>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-100">
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Venue Name</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Location</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Capacity</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Price / Day</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Events</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <% venues.forEach(venue => { %>
+            <tr class="hover:bg-slate-50/60 transition-colors">
+              <td class="px-5 py-3.5">
+                <span class="font-semibold text-gray-900"><%= venue.name %></span>
+                <% if (venue.facilities) { %>
+                  <span class="block text-[10px] text-gray-400 mt-0.5 truncate max-w-[200px]"><%= venue.facilities %></span>
+                <% } %>
+              </td>
+              <td class="px-5 py-3.5 text-gray-500 text-xs"><%= venue.location %></td>
+              <td class="px-5 py-3.5">
+                <div class="flex items-center gap-1.5 text-gray-900">
+                  <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m6-4a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 100-6"/>
+                  </svg>
+                  <span class="text-sm font-semibold"><%= venue.capacity.toLocaleString('id-ID') %></span>
+                </div>
+                <span class="block text-xs text-gray-500 mt-0.5 ml-5">pax</span>
+              </td>
+              <td class="px-5 py-3.5 text-gray-600 text-xs font-medium">Rp<%= Number(venue.pricePerDay).toLocaleString('id-ID') %></td>
+              <td class="px-5 py-3.5">
+                <% if (venue.status === 'available') { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500 text-white">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white inline-block"></span>Available
+                  </span>
+                <% } else if (venue.status === 'maintenance') { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500 text-white">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white inline-block"></span>Maintenance
+                  </span>
+                <% } else { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-500 text-white">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white inline-block"></span>Inactive
+                  </span>
+                <% } %>
+              </td>
+              <td class="px-5 py-3.5">
+                <a href="/venues/<%= venue.id %>"
+                  class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-semibold transition-colors">
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4m8 3V4M5 11h14"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                  </svg>
+                  <%= venue._count.bookings %> event<%= venue._count.bookings !== 1 ? 's' : '' %>
+                </a>
+              </td>
+              <td class="px-5 py-3.5">
+                <div class="flex items-center gap-1.5">
+                  <a href="/venues/<%= venue.id %>" aria-label="View detail"
+                    class="w-7 h-7 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </a>
+                  <a href="/venues/<%= venue.id %>/edit" aria-label="Edit"
+                    class="w-7 h-7 bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center justify-center transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </a>
+                  <form action="/venues/<%= venue.id %>/delete" method="POST" class="inline"
+                        onsubmit="return confirm('Delete venue \'<%= venue.name %>\'? Make sure there are no active bookings.')">
+                    <button type="submit" aria-label="Delete"
+                      class="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

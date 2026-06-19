@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' — VenueControl' : 'VenueControl' %></title>
+
+  <!-- Inter font dari Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="/css/output.css" />
+  <link rel="icon" href="/favicon.ico">
+
+  <!-- Chart.js — dimuat global, dipakai di dashboard -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body class="bg-app font-sans antialiased">
+
+  <div class="flex min-h-screen">
+    <%- include('../partials/sidebar') %>
+
+    <div class="flex-1 flex flex-col" style="margin-left:260px;">
+      <%- include('../partials/navbar') %>
+
+      <main class="flex-1 p-6">
+        <%- include('../partials/flash') %>
+        <%- body %>
+      </main>
+
+      <footer class="px-6 py-3 border-t border-slate-100 bg-white">
+        <p class="text-xs text-gray-400 text-center">
+          &copy; <%= new Date().getFullYear() %> VenueControl — Smart Venue & Event Booking Management
+        </p>
+      </footer>
+    </div>
+  </div>
+
+</body>
+</html>

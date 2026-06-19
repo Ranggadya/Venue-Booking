@@ -34,6 +34,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const isApiRequest = request.url.startsWith('/api/');
 
+    if (response.headersSent) {
+      return;
+    }
+
     if (isApiRequest) {
       return response.status(status).json({
         statusCode: status,
@@ -42,6 +46,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         path: request.url,
         timestamp: new Date().toISOString(),
       });
+    }
+
+    if (status === HttpStatus.UNAUTHORIZED) {
+      return response.redirect('/login');
     }
 
     if (status === HttpStatus.NOT_FOUND) {

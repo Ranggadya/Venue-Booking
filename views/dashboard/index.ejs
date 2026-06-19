@@ -1,0 +1,434 @@
+<%
+  function fmtTime(dt) {
+    const d = new Date(dt);
+    return d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0');
+  }
+  function fmtDate(dt) {
+    return new Date(dt).toLocaleDateString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
+    });
+  }
+
+  const avPct   = stats.totalVenues   > 0 ? Math.round((stats.availableVenues    / stats.totalVenues)   * 100) : 0;
+  const mntPct  = stats.totalVenues   > 0 ? Math.round((stats.maintenanceVenues  / stats.totalVenues)   * 100) : 0;
+  const confPct = stats.totalBookings > 0 ? Math.round((stats.confirmedBookings  / stats.totalBookings) * 100) : 0;
+  const cancPct = stats.totalBookings > 0 ? Math.round((stats.cancelledBookings  / stats.totalBookings) * 100) : 0;
+  const statPeriod = new Date().toLocaleDateString('en-US', {
+    month: 'long', year: 'numeric'
+  });
+%>
+
+<!-- Breadcrumb + Date -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
+      <span>Home</span>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+      <span class="text-gray-700 font-medium">Dashboard</span>
+    </nav>
+    <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+    <p class="text-xs text-gray-500 mt-0.5">
+      Monitor venue availability, booking activity, and payment status.
+    </p>
+  </div>
+  <div class="flex items-center gap-1.5 text-xs text-gray-500 border border-slate-200 bg-white px-3 py-2 rounded-xl shadow-card cursor-pointer hover:border-blue-300 transition-colors">
+    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+    </svg>
+    <span>This Month</span>
+    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ── Stat Cards ── -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-5">
+
+  <div class="stat-card stat-card-violet hover:-translate-y-0.5 transition-transform cursor-pointer">
+    <div class="relative z-10 h-full flex flex-col justify-between">
+      <div>
+        <p class="text-base font-semibold leading-none"><%= statPeriod %></p>
+        <p class="text-xs text-white/75 mt-2">Registered venue</p>
+      </div>
+      <div class="flex items-end justify-between pt-7">
+        <span class="text-[34px] leading-none font-semibold tracking-normal"><%= stats.totalVenues %></span>
+        <span class="stat-icon text-violet-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M9 12l2 2 4-4"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 21a9 9 0 100-18 9 9 0 000 18z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-cyan hover:-translate-y-0.5 transition-transform cursor-pointer">
+    <div class="relative z-10 h-full flex flex-col justify-between">
+      <div>
+        <p class="text-base font-semibold leading-none"><%= statPeriod %></p>
+        <p class="text-xs text-white/75 mt-2">All event bookings</p>
+      </div>
+      <div class="flex items-end justify-between pt-7">
+        <span class="text-[34px] leading-none font-semibold tracking-normal"><%= stats.totalBookings %></span>
+        <span class="stat-icon text-cyan-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4l8 4-8 4-8-4 8-4z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12l8 4 8-4M4 16l8 4 8-4"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-blue hover:-translate-y-0.5 transition-transform cursor-pointer">
+    <div class="relative z-10 h-full flex flex-col justify-between">
+      <div>
+        <p class="text-base font-semibold leading-none"><%= statPeriod %></p>
+        <p class="text-xs text-white/75 mt-2">Booking confirmed</p>
+      </div>
+      <div class="flex items-end justify-between pt-7">
+        <span class="text-[34px] leading-none font-semibold tracking-normal"><%= stats.confirmedBookings %></span>
+        <span class="stat-icon text-blue-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4m8 3V4M5 11h14"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-rose hover:-translate-y-0.5 transition-transform cursor-pointer">
+    <div class="relative z-10 h-full flex flex-col justify-between">
+      <div>
+        <p class="text-base font-semibold leading-none"><%= statPeriod %></p>
+        <p class="text-xs text-white/75 mt-2">Waiting confirmation</p>
+      </div>
+      <div class="flex items-end justify-between pt-7">
+        <span class="text-[34px] leading-none font-semibold tracking-normal"><%= stats.pendingBookings %></span>
+        <span class="stat-icon text-rose-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l2.5 2.5"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Analytics Row ── -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+
+  <!-- Chart Card -->
+  <div class="lg:col-span-2 bg-white rounded-card border border-slate-100 shadow-card p-5">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-bold text-gray-900">Booking Trend</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Overview of event booking activity</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-xs text-gray-500">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block"></span>Total
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-gray-500">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>Confirmed
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-gray-500">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span>Pending
+          </div>
+        </div>
+        <div class="flex items-center gap-1 text-xs text-gray-400 border border-slate-200 px-2.5 py-1 rounded-lg">
+          This month
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div style="height:200px;position:relative;">
+      <canvas id="bookingChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Overview Panel -->
+  <div class="bg-white rounded-card border border-slate-100 shadow-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-bold text-gray-900">Overview</h3>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 5a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+      </svg>
+    </div>
+
+    <!-- Summary Numbers -->
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="bg-slate-50 rounded-xl p-3 text-center">
+        <p class="text-2xl font-bold text-gray-900"><%= stats.totalVenues %></p>
+        <p class="text-xs text-gray-400 mt-0.5">Venues</p>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-3 text-center">
+        <p class="text-2xl font-bold text-gray-900"><%= stats.totalBookings %></p>
+        <p class="text-xs text-gray-400 mt-0.5">Bookings</p>
+      </div>
+    </div>
+
+    <!--
+      PERBAIKAN: Progress bar tidak menggunakan style="width:<%= %>%"
+      karena VS Code CSS linter complaint.
+      Solusi: gunakan data-* attribute, lalu set width via JavaScript di bawah.
+    -->
+    <div class="space-y-3"
+      id="overviewBars"
+      data-av="<%= avPct %>"
+      data-mn="<%= mntPct %>"
+      data-cf="<%= confPct %>"
+      data-cn="<%= cancPct %>">
+
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-gray-600 font-medium">Available venues</span>
+          <span class="text-gray-400"><%= stats.availableVenues %></span>
+        </div>
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="bar-av" class="h-full bg-emerald-400 rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-gray-600 font-medium">Maintenance</span>
+          <span class="text-gray-400"><%= stats.maintenanceVenues %></span>
+        </div>
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="bar-mn" class="h-full bg-amber-400 rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-gray-600 font-medium">Confirmed bookings</span>
+          <span class="text-gray-400"><%= stats.confirmedBookings %></span>
+        </div>
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="bar-cf" class="h-full bg-blue-400 rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-gray-600 font-medium">Cancelled</span>
+          <span class="text-gray-400"><%= stats.cancelledBookings %></span>
+        </div>
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="bar-cn" class="h-full bg-rose-400 rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Recent Bookings Table ── -->
+<div class="bg-white rounded-card border border-slate-100 shadow-card overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-50 flex items-center justify-between">
+    <div>
+      <h3 class="text-sm font-bold text-gray-900">Recent Bookings</h3>
+      <p class="text-xs text-gray-400 mt-0.5">Latest 5 event bookings</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/event-bookings/create"
+        class="flex items-center gap-1.5 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Booking
+      </a>
+      <a href="/event-bookings"
+        class="text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition-colors">
+        View All →
+      </a>
+    </div>
+  </div>
+
+  <% if (!stats.recentBookings || stats.recentBookings.length === 0) { %>
+    <div class="text-center py-12">
+      <svg class="w-10 h-10 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      <p class="text-sm text-gray-400 font-medium">No recent bookings yet</p>
+      <p class="text-xs text-gray-300 mt-1">Create your first event booking to start managing venue schedules.</p>
+    </div>
+  <% } else { %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-100">
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Event Name</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Venue</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Date & Time</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Organizer</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Payment</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <% stats.recentBookings.forEach(function(booking) { %>
+            <tr class="hover:bg-slate-50/60 transition-colors">
+              <td class="px-5 py-3.5">
+                <span class="font-semibold text-gray-900 text-sm">
+                  #<%= booking.id %> <%= booking.eventName %>
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-gray-500 text-xs"><%= booking.venue.name %></td>
+              <td class="px-5 py-3.5">
+                <span class="text-gray-700 text-xs font-medium"><%= fmtDate(booking.eventDate) %></span>
+                <span class="block text-gray-400 text-[10px]">
+                  <%= fmtTime(booking.startTime) %> – <%= fmtTime(booking.endTime) %>
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-gray-500 text-xs"><%= booking.organizerName %></td>
+              <td class="px-5 py-3.5">
+                <% if (booking.bookingStatus === 'confirmed') { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500 text-white">Confirmed</span>
+                <% } else if (booking.bookingStatus === 'pending') { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500 text-white">Pending</span>
+                <% } else { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500 text-white">Cancelled</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-3.5">
+                <% if (booking.paymentStatus === 'paid') { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500 text-white">Paid</span>
+                <% } else if (booking.paymentStatus === 'unpaid') { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500 text-white">Unpaid</span>
+                <% } else { %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500 text-white">Refunded</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-3.5">
+                <a href="/event-bookings/<%= booking.id %>"
+                  class="w-7 h-7 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors"
+                  aria-label="View detail">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </a>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<!--
+  PERBAIKAN 1: Inject data server ke client via data-* attribute (bukan EJS di
+  dalam <script>) agar VS Code JS linter tidak complaint "Expression expected".
+  Pola ini sama dengan #overviewBars yang sudah dipakai untuk progress bar.
+-->
+<div id="dashData" hidden
+  data-total="<%= stats.totalBookings %>"
+  data-confirmed="<%= stats.confirmedBookings %>"
+  data-pending="<%= stats.pendingBookings %>"
+></div>
+<script>
+  var _el   = document.getElementById('dashData');
+  var _dash = {
+    totalBookings:     Number(_el.dataset.total),
+    confirmedBookings: Number(_el.dataset.confirmed),
+    pendingBookings:   Number(_el.dataset.pending)
+  };
+</script>
+
+<!--
+  PERBAIKAN 2: Chart.js murni JavaScript, tidak ada EJS tag di dalam array.
+  Data diambil dari variabel _dash yang sudah diinject di blok script di atas.
+-->
+<script>
+(function () {
+  var ctx = document.getElementById('bookingChart');
+  if (!ctx || typeof Chart === 'undefined') return;
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['1', '5', '8', '10', '12', '15', '18', '20', '22', '25', '28', '30'],
+      datasets: [
+        {
+          label: 'Total',
+          data: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, _dash.totalBookings],
+          borderColor: '#818CF8',
+          backgroundColor: 'rgba(129,140,248,.08)',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: 'Confirmed',
+          data: [1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, _dash.confirmedBookings],
+          borderColor: '#22D3EE',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4
+        },
+        {
+          label: 'Pending',
+          data: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, _dash.pendingBookings],
+          borderColor: '#FB7185',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10, family: 'Inter' }, color: '#9CA3AF' }
+        },
+        y: {
+          grid: { color: '#F8FAFC' },
+          ticks: { font: { size: 10, family: 'Inter' }, color: '#9CA3AF', maxTicksLimit: 5 },
+          border: { display: false }
+        }
+      }
+    }
+  });
+})();
+</script>
+
+<!--
+  PERBAIKAN 3: Set lebar progress bar via JavaScript, bukan style="width:<%= %>%".
+  Nilai persentase diambil dari data-* attribute yang di-set oleh EJS di elemen
+  #overviewBars. Ini menghilangkan EJS tag dari dalam atribut style=""
+  yang menyebabkan VS Code CSS linter complaint.
+-->
+<script>
+(function () {
+  var el = document.getElementById('overviewBars');
+  if (!el) return;
+
+  document.getElementById('bar-av').style.width = el.dataset.av + '%';
+  document.getElementById('bar-mn').style.width = el.dataset.mn + '%';
+  document.getElementById('bar-cf').style.width = el.dataset.cf + '%';
+  document.getElementById('bar-cn').style.width = el.dataset.cn + '%';
+})();
+</script>

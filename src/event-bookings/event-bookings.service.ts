@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BookingStatus, PaymentStatus } from '@prisma/client';
+import { BookingStatus, PaymentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { VenuesService } from 'src/venues/venues.service';
 import { CreateEventBookingDto } from './dto/create-event-booking.dto';
@@ -71,34 +71,74 @@ export class EventBookingsService {
     }
   }
 
-  async findAll(search?: string) {
+  private buildWhere(
+    search?: string,
+  ): Prisma.EventBookingWhereInput | undefined {
+    if (!search) {
+      return undefined;
+    }
+
     const bookingStatus = Object.values(BookingStatus);
     const paymentStatus = Object.values(PaymentStatus);
 
-    return this.prisma.eventBooking.findMany({
-      where: search
-        ? {
-            OR: [
-              { eventName: { contains: search, mode: 'insensitive' } },
-              { organizerName: { contains: search, mode: 'insensitive' } },
+    return {
+      OR: [
+        { eventName: { contains: search, mode: 'insensitive' } },
+        { organizerName: { contains: search, mode: 'insensitive' } },
 
-              ...(bookingStatus.includes(search as BookingStatus)
-                ? [{ bookingStatus: { equals: search as BookingStatus } }]
-                : []),
-              ...(paymentStatus.includes(search as PaymentStatus)
-                ? [{ paymentStatus: { equals: search as PaymentStatus } }]
-                : []),
-              {
-                venue: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
-              },
-            ],
-          }
-        : undefined,
+        ...(bookingStatus.includes(search as BookingStatus)
+          ? [{ bookingStatus: { equals: search as BookingStatus } }]
+          : []),
+        ...(paymentStatus.includes(search as PaymentStatus)
+          ? [{ paymentStatus: { equals: search as PaymentStatus } }]
+          : []),
+        {
+          venue: {
+            name: { contains: search, mode: 'insensitive' },
+          },
+        },
+      ],
+    };
+  }
+
+  async findAll(search?: string) {
+    const where = this.buildWhere(search);
+
+    return this.prisma.eventBooking.findMany({
+      where,
       include: { venue: true },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findPaginated(search: string | undefined, page: number, limit = 10) {
+    const where = this.buildWhere(search);
+    const pageSize = Math.max(1, limit);
+    const totalItems = await this.prisma.eventBooking.count({ where });
+    const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
+    const currentPage = Math.min(Math.max(page, 1), totalPages);
+
+    const bookings = await this.prisma.eventBooking.findMany({
+      where,
+      include: { venue: true },
+      orderBy: { createdAt: 'desc' },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+    });
+
+    return {
+      bookings,
+      pagination: {
+        currentPage,
+        totalPages,
+        totalItems,
+        pageSize,
+        from: totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1,
+        to: Math.min(currentPage * pageSize, totalItems),
+        hasPrevious: currentPage > 1,
+        hasNext: currentPage < totalPages,
+      },
+    };
   }
 
   async findOne(id: number) {

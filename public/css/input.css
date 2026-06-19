@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .stat-card {
+    position: relative;
+    min-height: 132px;
+    overflow: hidden;
+    border-radius: 10px;
+    padding: 20px 16px;
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    right: -16px;
+    top: -30px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.11);
+  }
+
+  .stat-card::after {
+    content: "";
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    right: 28px;
+    top: -12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .stat-card-violet {
+    background: linear-gradient(135deg, #6757f5 0%, #735cff 100%);
+  }
+
+  .stat-card-cyan {
+    background: linear-gradient(135deg, #10bde3 0%, #09a8d5 100%);
+  }
+
+  .stat-card-blue {
+    background: linear-gradient(135deg, #527af4 0%, #4b7cf2 100%);
+  }
+
+  .stat-card-rose {
+    background: linear-gradient(135deg, #ff8588 0%, #fb777f 100%);
+  }
+
+  .stat-icon {
+    display: flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+}

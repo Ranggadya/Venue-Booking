@@ -29,15 +29,21 @@ export class EventBookingsPageController {
   @Get()
   async index(
     @Query('search') search: string,
+    @Query('page') page: string | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const bookings = await this.eventBookingsService.findAll(search);
+    const currentPage = Number.parseInt(page ?? '1', 10);
+    const result = await this.eventBookingsService.findPaginated(
+      search,
+      Number.isNaN(currentPage) ? 1 : currentPage,
+    );
     const user = req.user;
 
     return res.render('event-bookings/index', {
       title: 'Event Bookings',
-      bookings,
+      bookings: result.bookings,
+      pagination: result.pagination,
       search: search ?? '',
       user,
       messages: {

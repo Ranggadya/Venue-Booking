@@ -3,16 +3,15 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import flash from 'connect-flash';
-import * as passport from 'passport';
+import passport from 'passport';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import * as expressLayouts from 'express-ejs-layouts';
+import expressLayouts from 'express-ejs-layouts';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,8 +21,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  app.useStaticAssets(join(__dirname, '..', 'public'));
-  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.useStaticAssets(join(process.cwd(), 'public'));
+
+  app.setBaseViewsDir(join(process.cwd(), 'views'));
   app.setViewEngine('ejs');
   app.use(expressLayouts);
   app.set('layout', 'layouts/main');
@@ -70,19 +70,9 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  const config = new DocumentBuilder()
-    .setTitle('Smart Venue Booking API')
-    .setDescription('API documentation Smart Venue & Event Booking Management')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
-
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   console.log(`\n🚀 http://localhost:${port}`);
-  console.log(`📖 Swagger: http://localhost:${port}/api-docs\n`);
 }
 
 void bootstrap();

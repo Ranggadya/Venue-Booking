@@ -30,6 +30,11 @@ export class VenuesService {
           }
         : undefined,
       orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { bookings: true },
+        },
+      },
     });
   }
 
