@@ -22,34 +22,22 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Buat Date UTC murni (tanpa time-zone shift) untuk kolom @db.Date */
 function date(year: number, month: number, day: number): Date {
   return new Date(Date.UTC(year, month - 1, day));
 }
 
-/** Buat DateTime UTC murni untuk kolom @db.Time(6) */
 function time(hour: number, minute: number): Date {
   return new Date(Date.UTC(1970, 0, 1, hour, minute, 0, 0));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main
-// ─────────────────────────────────────────────────────────────────────────────
-
 async function main() {
   console.log('Seeding database...\n');
 
-  // ── 1. Clean existing data (order matters due to FK) ──────────────────────
   await prisma.eventBooking.deleteMany();
   await prisma.venue.deleteMany();
   await prisma.user.deleteMany();
   console.log('Cleared existing records.');
 
-  // ── 2. Users ──────────────────────────────────────────────────────────────
   const saltRounds = 10;
 
   const [admin, staff, operator] = await Promise.all([
@@ -80,7 +68,6 @@ async function main() {
     `Users created: ${[admin, staff, operator].map((u) => u.email).join(', ')}`,
   );
 
-  // ── 3. Venues ─────────────────────────────────────────────────────────────
   const venueData = [
     {
       name: 'Grand Ballroom Nusantara',
@@ -167,14 +154,13 @@ async function main() {
 
   console.log(`Venues created: ${venues.length} venues.`);
 
-  // ── 4. Event Bookings ─────────────────────────────────────────────────────
   const bookings = [
-    // --- Confirmed + Paid ---
     {
-      venueId: venues[0].id, // Grand Ballroom Nusantara
+      venueId: venues[0].id,
       eventName: 'Gala Dinner Annual PT Maju Bersama',
       organizerName: 'Dewi Kusuma',
-      eventDate: date(2026, 7, 5),
+      startDate: date(2026, 7, 5),
+      endDate: date(2026, 7, 5),
       startTime: time(18, 0),
       endTime: time(23, 0),
       attendees: 850,
@@ -187,7 +173,8 @@ async function main() {
       venueId: venues[2].id, // Convention Hall Prambanan
       eventName: 'Konvensi Teknologi Indonesia 2026',
       organizerName: 'Rizky Firmansyah',
-      eventDate: date(2026, 8, 14),
+      startDate: date(2026, 8, 14),
+      endDate: date(2026, 8, 14),
       startTime: time(8, 0),
       endTime: time(17, 0),
       attendees: 700,
@@ -200,7 +187,8 @@ async function main() {
       venueId: venues[1].id, // Aula Serbaguna Pancasila
       eventName: 'Seminar Nasional Pendidikan 4.0',
       organizerName: 'Dr. Andi Wijaya',
-      eventDate: date(2026, 7, 20),
+      startDate: date(2026, 7, 20),
+      endDate: date(2026, 7, 20),
       startTime: time(9, 0),
       endTime: time(16, 0),
       attendees: 450,
@@ -213,7 +201,8 @@ async function main() {
       venueId: venues[3].id, // Ruang Rapat Diponegoro
       eventName: 'Rapat Direksi Kuartal III',
       organizerName: 'Maya Hartini',
-      eventDate: date(2026, 7, 10),
+      startDate: date(2026, 7, 10),
+      endDate: date(2026, 7, 10),
       startTime: time(10, 0),
       endTime: time(13, 0),
       attendees: 20,
@@ -226,7 +215,8 @@ async function main() {
       venueId: venues[4].id, // Taman Budaya Cendrawasih
       eventName: 'Festival Kuliner Nusantara 2026',
       organizerName: 'Komunitas Kuliner Makassar',
-      eventDate: date(2026, 9, 1),
+      startDate: date(2026, 9, 1),
+      endDate: date(2026, 9, 1),
       startTime: time(10, 0),
       endTime: time(22, 0),
       attendees: 1100,
@@ -239,7 +229,8 @@ async function main() {
       venueId: venues[0].id, // Grand Ballroom Nusantara
       eventName: 'Pernikahan Adit & Laras',
       organizerName: 'Keluarga Suryana',
-      eventDate: date(2026, 10, 18),
+      startDate: date(2026, 10, 18),
+      endDate: date(2026, 10, 18),
       startTime: time(9, 0),
       endTime: time(22, 0),
       attendees: 950,
@@ -252,7 +243,8 @@ async function main() {
       venueId: venues[1].id, // Aula Serbaguna Pancasila
       eventName: 'Workshop Digital Marketing',
       organizerName: 'Startup Hub Bandung',
-      eventDate: date(2026, 6, 10),
+      startDate: date(2026, 6, 10),
+      endDate: date(2026, 6, 10),
       startTime: time(9, 0),
       endTime: time(15, 0),
       attendees: 120,
@@ -265,7 +257,8 @@ async function main() {
       venueId: venues[3].id, // Ruang Rapat Diponegoro
       eventName: 'Pelatihan K3 Internal',
       organizerName: 'HRD PT Bangun Karya',
-      eventDate: date(2026, 6, 5),
+      startDate: date(2026, 6, 5),
+      endDate: date(2026, 6, 5),
       startTime: time(13, 0),
       endTime: time(17, 0),
       attendees: 35,
@@ -278,7 +271,8 @@ async function main() {
       venueId: venues[4].id, // Taman Budaya Cendrawasih
       eventName: 'Konser Musik Independen Makassar',
       organizerName: 'Yayasan Seni Sulawesi',
-      eventDate: date(2026, 5, 25),
+      startDate: date(2026, 5, 25),
+      endDate: date(2026, 5, 25),
       startTime: time(17, 0),
       endTime: time(23, 0),
       attendees: 1000,
@@ -291,7 +285,8 @@ async function main() {
       venueId: venues[2].id, // Convention Hall Prambanan
       eventName: 'Pameran Kerajinan Tangan Jogja Craft 2026',
       organizerName: 'Dinas Perindustrian DIY',
-      eventDate: date(2026, 4, 15),
+      startDate: date(2026, 4, 15),
+      endDate: date(2026, 4, 15),
       startTime: time(8, 0),
       endTime: time(20, 0),
       attendees: 600,
@@ -304,7 +299,6 @@ async function main() {
   await prisma.eventBooking.createMany({ data: bookings });
   console.log(`Event bookings created: ${bookings.length} bookings.`);
 
-  // ── Summary ───────────────────────────────────────────────────────────────
   const [userCount, venueCount, bookingCount] = await Promise.all([
     prisma.user.count(),
     prisma.venue.count(),

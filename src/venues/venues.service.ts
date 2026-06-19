@@ -57,7 +57,10 @@ export class VenuesService {
         bookings: {
           orderBy: [
             {
-              eventDate: 'asc',
+              startDate: 'asc',
+            },
+            {
+              endDate: 'asc',
             },
             {
               startTime: 'asc',

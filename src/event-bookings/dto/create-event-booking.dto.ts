@@ -28,24 +28,29 @@ export class CreateEventBookingDto {
   @MaxLength(100)
   organizer_name!: string;
 
-  @IsNotEmpty({ message: 'Tanggal event wajib diisi' })
+  @IsNotEmpty({ message: 'Tanggal mulai event wajib diisi' })
   @IsDateString(
     {},
-    { message: 'Format tanggal tidak valid (gunakan YYYY-MM-DD)' },
+    { message: 'Format tanggal mulai tidak valid (gunakan YYYY-MM-DD)' },
   )
-  // @IsDateString memvalidasi format "2026-06-15"
-  event_date!: string;
+  start_date!: string;
+
+  @IsNotEmpty({ message: 'Tanggal selesai event wajib diisi' })
+  @IsDateString(
+    {},
+    { message: 'Format tanggal selesai tidak valid (gunakan YYYY-MM-DD)' },
+  )
+  end_date!: string;
 
   @IsNotEmpty({ message: 'Waktu mulai wajib diisi' })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: 'Format waktu tidak valid (gunakan HH:MM)',
+    message: 'Format waktu mulai tidak valid (gunakan HH:MM)',
   })
-  // Regex memastikan format "08:00" atau "23:59"
   start_time!: string;
 
   @IsNotEmpty({ message: 'Waktu selesai wajib diisi' })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: 'Format waktu tidak valid (gunakan HH:MM)',
+    message: 'Format waktu selesai tidak valid (gunakan HH:MM)',
   })
   end_time!: string;
 

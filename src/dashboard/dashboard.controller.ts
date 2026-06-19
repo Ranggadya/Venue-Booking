@@ -17,10 +17,6 @@ export class DashboardController {
       title: 'Dashboard',
       stats,
       user,
-      messages: {
-        success: req.flash('success'),
-        error: req.flash('error'),
-      },
     });
   }
 }

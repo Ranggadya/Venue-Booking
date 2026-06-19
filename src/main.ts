@@ -49,14 +49,6 @@ async function bootstrap() {
   app.use(passport.session());
   app.use(flash());
 
-  // ─── Auto-inject ke semua view ────────────────────────────────────────────
-  // Middleware ini berjalan di setiap request dan menyuntikkan tiga variabel
-  // ke res.locals sehingga tersedia di SEMUA template EJS tanpa perlu
-  // dikirim manual dari setiap controller.
-  //
-  // currentPath → untuk sidebar aktif state
-  // user        → data admin yang sedang login (dari Passport session)
-  // messages    → flash messages success/error (dibaca dan dikosongkan otomatis)
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.locals.currentPath = req.path;
     res.locals.user = req.user ?? null;

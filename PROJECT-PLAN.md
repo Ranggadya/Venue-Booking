@@ -1,14 +1,14 @@
-# Project Plan — Smart Venue & Event Booking Management
+# Project Plan — Venue Event Booking Management
 
 ## 1. Nama Project
 
-**Smart Venue & Event Booking Management**
+**Venue Event Booking Management**
 
 ---
 
 ## 2. Deskripsi Singkat
 
-Smart Venue & Event Booking Management adalah aplikasi admin panel berbasis web untuk membantu pengelola venue mencatat data venue dan jadwal event secara terpusat. Sistem ini digunakan oleh admin untuk mengelola data venue, membuat event booking, melihat riwayat booking pada setiap venue, memantau status booking dan pembayaran, serta mencegah jadwal booking yang bentrok.
+Venue Event Booking Management adalah aplikasi admin panel berbasis web untuk membantu pengelola venue mencatat data venue dan jadwal event secara terpusat. Sistem ini digunakan oleh admin untuk mengelola data venue, membuat event booking, melihat riwayat booking pada setiap venue, memantau status booking dan pembayaran, serta mencegah jadwal booking yang bentrok.
 
 Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SSR)**. Halaman admin dibuat menggunakan **EJS + Tailwind CSS**, sedangkan endpoint API JSON disediakan untuk kebutuhan testing melalui Postman.
 
@@ -1512,6 +1512,6 @@ Isi video demo:
 
 ## 33. Kesimpulan
 
-Smart Venue & Event Booking Management adalah aplikasi admin panel untuk mengelola venue dan event booking secara terpusat. Sistem ini menerapkan relasi one-to-many antara venue dan event booking, server-rendered page menggunakan EJS, styling dengan Tailwind CSS, serta API endpoint untuk kebutuhan testing melalui Postman.
+Venue Event Booking Management adalah aplikasi admin panel untuk mengelola venue dan event booking secara terpusat. Sistem ini menerapkan relasi one-to-many antara venue dan event booking, server-rendered page menggunakan EJS, styling dengan Tailwind CSS, serta API endpoint untuk kebutuhan testing melalui Postman.
 
 Project ini mencakup fitur utama seperti authentication, dashboard, CRUD venue, CRUD event booking, search, validasi status venue, validasi kapasitas peserta, booking conflict validation, JWT API, DTO validation, dan error handling. Dengan scope tersebut, project ini sesuai untuk challenge fullstack TypeScript berbasis NestJS dan tetap realistis untuk dikembangkan.

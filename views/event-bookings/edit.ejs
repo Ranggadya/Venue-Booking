@@ -1,12 +1,20 @@
 <%
+  const form = typeof oldInput !== 'undefined' && oldInput ? oldInput : {};
+  const fieldValue = function (name, fallback) {
+    return form[name] !== undefined && form[name] !== null ? form[name] : fallback;
+  };
   // Pre-fill: konversi Date object dari DB ke format yang dibutuhkan input HTML
-  const eventDateStr = new Date(booking.eventDate).toISOString().split('T')[0];
+  const startDateStr = fieldValue('start_date', new Date(booking.startDate).toISOString().split('T')[0]);
+  const endDateStr = fieldValue('end_date', new Date(booking.endDate).toISOString().split('T')[0]);
   const startH = new Date(booking.startTime).getUTCHours().toString().padStart(2,'0');
   const startM = new Date(booking.startTime).getUTCMinutes().toString().padStart(2,'0');
-  const startTimeStr = startH + ':' + startM;
+  const startTimeStr = fieldValue('start_time', startH + ':' + startM);
   const endH = new Date(booking.endTime).getUTCHours().toString().padStart(2,'0');
   const endM = new Date(booking.endTime).getUTCMinutes().toString().padStart(2,'0');
-  const endTimeStr = endH + ':' + endM;
+  const endTimeStr = fieldValue('end_time', endH + ':' + endM);
+  const selectedVenueId = Number(fieldValue('venue_id', booking.venueId));
+  const selectedBookingStatus = fieldValue('booking_status', booking.bookingStatus);
+  const selectedPaymentStatus = fieldValue('payment_status', booking.paymentStatus);
 %>
 
 <!-- Breadcrumb -->
@@ -34,7 +42,7 @@
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors">
           <% venues.forEach(venue => { %>
             <option value="<%= venue.id %>"
-              <%= booking.venueId === venue.id ? 'selected' : '' %>
+              <%= selectedVenueId === venue.id ? 'selected' : '' %>
               <%= venue.status !== 'available' && booking.venueId !== venue.id ? 'disabled' : '' %>>
               <%= venue.name %> (<%= venue.status === 'available' ? 'Available' : venue.status %>)
             </option>
@@ -45,27 +53,32 @@
       <!-- Event Name -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1.5">Event Name <span class="text-red-400">*</span></label>
-        <input type="text" name="event_name" required maxlength="150" value="<%= booking.eventName %>"
+        <input type="text" name="event_name" required maxlength="150" value="<%= fieldValue('event_name', booking.eventName) %>"
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors" />
       </div>
 
       <!-- Organizer -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1.5">Organizer Name <span class="text-red-400">*</span></label>
-        <input type="text" name="organizer_name" required maxlength="100" value="<%= booking.organizerName %>"
+        <input type="text" name="organizer_name" required maxlength="100" value="<%= fieldValue('organizer_name', booking.organizerName) %>"
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors" />
       </div>
 
       <!-- Date & Attendees -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">Event Date <span class="text-red-400">*</span></label>
-          <input type="date" name="event_date" required value="<%= eventDateStr %>"
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Start Date <span class="text-red-400">*</span></label>
+          <input type="date" name="start_date" required value="<%= startDateStr %>"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">End Date <span class="text-red-400">*</span></label>
+          <input type="date" name="end_date" required value="<%= endDateStr %>"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Attendees <span class="text-gray-400 text-xs font-normal">(optional)</span></label>
-          <input type="number" name="attendees" min="1" value="<%= booking.attendees ?? '' %>"
+          <input type="number" name="attendees" min="1" value="<%= fieldValue('attendees', booking.attendees ?? '') %>"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors" />
         </div>
       </div>
@@ -90,18 +103,18 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Booking Status</label>
           <select name="booking_status"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors">
-            <option value="pending" <%= booking.bookingStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-            <option value="confirmed" <%= booking.bookingStatus === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
-            <option value="cancelled" <%= booking.bookingStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            <option value="pending" <%= selectedBookingStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="confirmed" <%= selectedBookingStatus === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+            <option value="cancelled" <%= selectedBookingStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
           </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Payment Status</label>
           <select name="payment_status"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 transition-colors">
-            <option value="unpaid" <%= booking.paymentStatus === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
-            <option value="paid" <%= booking.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
-            <option value="refunded" <%= booking.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
+            <option value="unpaid" <%= selectedPaymentStatus === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
+            <option value="paid" <%= selectedPaymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+            <option value="refunded" <%= selectedPaymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
           </select>
         </div>
       </div>
@@ -110,7 +123,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1.5">Notes <span class="text-gray-400 text-xs font-normal">(optional)</span></label>
         <textarea name="notes" rows="3"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 resize-none transition-colors"><%= booking.notes ?? '' %></textarea>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50 resize-none transition-colors"><%= fieldValue('notes', booking.notes ?? '') %></textarea>
       </div>
 
       <div class="flex items-center gap-3 pt-2">
@@ -126,3 +139,22 @@
     </form>
   </div>
 </div>
+
+<script>
+(function () {
+  var startDate = document.querySelector('input[name="start_date"]');
+  var endDate = document.querySelector('input[name="end_date"]');
+  if (!startDate || !endDate) return;
+
+  function syncEndDate() {
+    if (!startDate.value) return;
+    endDate.min = startDate.value;
+    if (!endDate.value || endDate.value < startDate.value) {
+      endDate.value = startDate.value;
+    }
+  }
+
+  startDate.addEventListener('change', syncEndDate);
+  syncEndDate();
+})();
+</script>

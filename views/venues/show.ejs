@@ -8,6 +8,11 @@
       day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
     });
   }
+  function fmtDateRange(startDt, endDt) {
+    const start = fmtDate(startDt);
+    const end = fmtDate(endDt);
+    return start === end ? start : start + ' - ' + end;
+  }
 %>
 
 <!-- Breadcrumb -->
@@ -88,7 +93,10 @@
           Add Booking
         </a>
         <form action="/venues/<%= venue.id %>/delete" method="POST" class="ml-auto"
-              onsubmit="return confirm('Delete this venue? Ensure there are no active bookings.')">
+              data-confirm="true"
+              data-confirm-title="Hapus venue?"
+              data-confirm-message="Venue akan dihapus jika tidak memiliki booking aktif."
+              data-confirm-label="Hapus Venue">
           <button type="submit"
             class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -128,7 +136,7 @@
                     <span class="block text-xs text-gray-400"><%= booking.organizerName %></span>
                   </td>
                   <td class="px-5 py-3.5">
-                    <span class="text-gray-700 text-xs font-medium"><%= fmtDate(booking.eventDate) %></span>
+                    <span class="text-gray-700 text-xs font-medium"><%= fmtDateRange(booking.startDate, booking.endDate) %></span>
                     <span class="block text-[10px] text-gray-400"><%= fmtTime(booking.startTime) %> – <%= fmtTime(booking.endTime) %></span>
                   </td>
                   <td class="px-5 py-3.5">

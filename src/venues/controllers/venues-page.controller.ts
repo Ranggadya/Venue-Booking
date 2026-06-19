@@ -29,7 +29,7 @@ export class VenuesPageController {
     const venues = await this.venuesService.findAll(search);
 
     return res.render('venues/index', {
-      title: 'Venues - Smart Venue Booking',
+      title: 'Venues - Venue Booking',
       pageTitle: 'Venues',
       venues,
       search: search ?? '',
@@ -40,9 +40,12 @@ export class VenuesPageController {
 
   @Get('create')
   createPage(@Req() req: Request, @Res() res: Response) {
+    const oldInput = this.getOldInput(req);
+
     return res.render('venues/create', {
-      title: 'Create Venue - Smart Venue Booking',
+      title: 'Create Venue - Venue Booking',
       pageTitle: 'Create Venue',
+      oldInput,
       error: req.flash('error'),
     });
   }
@@ -63,6 +66,7 @@ export class VenuesPageController {
         error instanceof Error ? error.message : 'Venue gagal ditambahkan';
 
       req.flash('error', message);
+      req.flash('formData', JSON.stringify(createVenueDto));
       return res.redirect('/venues/create');
     }
   }
@@ -77,7 +81,7 @@ export class VenuesPageController {
       const venue = await this.venuesService.findOneWithBookings(Number(id));
 
       return res.render('venues/show', {
-        title: `${venue.name} - Smart Venue Booking`,
+        title: `${venue.name} - Venue Booking`,
         pageTitle: 'Venue Detail',
         venue,
         success: req.flash('success'),
@@ -100,11 +104,13 @@ export class VenuesPageController {
   ) {
     try {
       const venue = await this.venuesService.findOne(Number(id));
+      const oldInput = this.getOldInput(req);
 
       return res.render('venues/edit', {
-        title: `Edit ${venue.name} - Smart Venue Booking`,
+        title: `Edit ${venue.name} - Venue Booking`,
         pageTitle: 'Edit Venue',
         venue,
+        oldInput,
         error: req.flash('error'),
       });
     } catch (error) {
@@ -133,6 +139,7 @@ export class VenuesPageController {
         error instanceof Error ? error.message : 'Venue gagal diperbarui';
 
       req.flash('error', message);
+      req.flash('formData', JSON.stringify(updateVenueDto));
       return res.redirect(`/venues/${id}/edit`);
     }
   }
@@ -154,6 +161,23 @@ export class VenuesPageController {
 
       req.flash('error', message);
       return res.redirect('/venues');
+    }
+  }
+
+  private getOldInput(req: Request): Record<string, unknown> {
+    const [raw] = req.flash('formData');
+
+    if (!raw) {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return parsed && typeof parsed === 'object'
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
     }
   }
 }

@@ -1,3 +1,10 @@
+<%
+  const form = typeof oldInput !== 'undefined' && oldInput ? oldInput : {};
+  const fieldValue = function (name, fallback) {
+    return form[name] !== undefined && form[name] !== null ? form[name] : fallback;
+  };
+%>
+
 <!-- Breadcrumb -->
 <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
   <a href="/event-bookings" class="hover:text-blue-600">Event Bookings</a>
@@ -10,6 +17,19 @@
     <h3 class="text-lg font-semibold text-gray-900 mb-5">Form Tambah Booking</h3>
 
     <form action="/event-bookings" method="POST" class="space-y-5">
+      <div id="bookingConflictNotice" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+        <div class="flex items-start gap-3">
+          <div class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+            <svg class="h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-red-700">Jadwal venue sudah terpakai</p>
+            <p id="bookingConflictText" class="mt-1 text-xs leading-relaxed text-red-600"></p>
+          </div>
+        </div>
+      </div>
 
       <!-- Pilih Venue -->
       <div>
@@ -21,7 +41,7 @@
           <option value="">— Pilih Venue —</option>
           <%# Hanya tampilkan venue yang berstatus 'available' di dropdown %>
           <% venues.filter(v => v.status === 'available').forEach(venue => { %>
-            <option value="<%= venue.id %>">
+            <option value="<%= venue.id %>" <%= String(fieldValue('venue_id', '')) === String(venue.id) ? 'selected' : '' %>>
               <%= venue.name %> — <%= venue.location %> (Kap. <%= venue.capacity %> orang)
             </option>
           <% }) %>
@@ -36,7 +56,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-1.5">
           Nama Event <span class="text-red-500">*</span>
         </label>
-        <input type="text" name="event_name" required maxlength="150"
+        <input type="text" name="event_name" required maxlength="150" value="<%= fieldValue('event_name', '') %>"
           placeholder="Contoh: Seminar Teknologi 2026"
           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
@@ -46,25 +66,32 @@
         <label class="block text-sm font-medium text-gray-700 mb-1.5">
           Nama Penyelenggara <span class="text-red-500">*</span>
         </label>
-        <input type="text" name="organizer_name" required maxlength="100"
+        <input type="text" name="organizer_name" required maxlength="100" value="<%= fieldValue('organizer_name', '') %>"
           placeholder="Contoh: Komunitas Developer"
           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
 
       <!-- Tanggal & Peserta -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
-            Tanggal Event <span class="text-red-500">*</span>
+            Tanggal Mulai <span class="text-red-500">*</span>
           </label>
-          <input type="date" name="event_date" required
+          <input type="date" name="start_date" required value="<%= fieldValue('start_date', '') %>"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">
+            Tanggal Selesai <span class="text-red-500">*</span>
+          </label>
+          <input type="date" name="end_date" required value="<%= fieldValue('end_date', '') %>"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
             Jumlah Peserta <span class="text-gray-400 text-xs">(opsional)</span>
           </label>
-          <input type="number" name="attendees" min="1"
+          <input type="number" name="attendees" min="1" value="<%= fieldValue('attendees', '') %>"
             placeholder="Contoh: 250"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
@@ -76,14 +103,14 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
             Waktu Mulai <span class="text-red-500">*</span>
           </label>
-          <input type="time" name="start_time" required
+          <input type="time" name="start_time" required value="<%= fieldValue('start_time', '') %>"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
             Waktu Selesai <span class="text-red-500">*</span>
           </label>
-          <input type="time" name="end_time" required
+          <input type="time" name="end_time" required value="<%= fieldValue('end_time', '') %>"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
       </div>
@@ -94,18 +121,18 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Status Booking</label>
           <select name="booking_status"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="pending" <%= fieldValue('booking_status', 'pending') === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="confirmed" <%= fieldValue('booking_status', 'pending') === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+            <option value="cancelled" <%= fieldValue('booking_status', 'pending') === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
           </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Status Pembayaran</label>
           <select name="payment_status"
             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="unpaid">Unpaid</option>
-            <option value="paid">Paid</option>
-            <option value="refunded">Refunded</option>
+            <option value="unpaid" <%= fieldValue('payment_status', 'unpaid') === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
+            <option value="paid" <%= fieldValue('payment_status', 'unpaid') === 'paid' ? 'selected' : '' %>>Paid</option>
+            <option value="refunded" <%= fieldValue('payment_status', 'unpaid') === 'refunded' ? 'selected' : '' %>>Refunded</option>
           </select>
         </div>
       </div>
@@ -117,12 +144,13 @@
         </label>
         <textarea name="notes" rows="3"
           placeholder="Catatan tambahan untuk booking ini..."
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"><%= fieldValue('notes', '') %></textarea>
       </div>
 
       <!-- Actions -->
       <div class="flex items-center gap-3 pt-2">
         <button type="submit"
+          id="saveBookingButton"
           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors">
           Simpan Booking
         </button>
@@ -135,3 +163,135 @@
     </form>
   </div>
 </div>
+
+<script>
+(function () {
+  var activeBookings = <%- JSON.stringify(
+    (typeof activeBookings !== 'undefined' ? activeBookings : []).map(function (booking) {
+      return {
+        id: booking.id,
+        venueId: booking.venueId,
+        eventName: booking.eventName,
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+        startTime: booking.startTime,
+        endTime: booking.endTime
+      };
+    })
+  ).replace(/</g, '\\u003c') %>;
+
+  function toDateOnly(value) {
+    return value ? new Date(value + 'T00:00:00.000Z') : null;
+  }
+
+  function toInputDate(value) {
+    return new Date(value).toISOString().split('T')[0];
+  }
+
+  function toInputTime(value) {
+    var date = new Date(value);
+    return date.getUTCHours().toString().padStart(2, '0') + ':' + date.getUTCMinutes().toString().padStart(2, '0');
+  }
+
+  function toDateTime(dateValue, timeValue, fallbackTime) {
+    if (!dateValue) return null;
+    var time = timeValue || fallbackTime;
+    return new Date(dateValue + 'T' + time + ':00.000Z');
+  }
+
+  function rangesOverlap(startA, endA, startB, endB) {
+    return startA < endB && endA > startB;
+  }
+
+  function formatDate(value) {
+    return new Date(value).toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC'
+    });
+  }
+
+  function formatBookingRange(booking) {
+    var startDate = formatDate(booking.startDate);
+    var endDate = formatDate(booking.endDate);
+    var dateRange = startDate === endDate ? startDate : startDate + ' - ' + endDate;
+    return dateRange + ', ' + toInputTime(booking.startTime) + ' - ' + toInputTime(booking.endTime);
+  }
+
+  var venue = document.querySelector('select[name="venue_id"]');
+  var startDate = document.querySelector('input[name="start_date"]');
+  var endDate = document.querySelector('input[name="end_date"]');
+  var startTime = document.querySelector('input[name="start_time"]');
+  var endTime = document.querySelector('input[name="end_time"]');
+  var notice = document.getElementById('bookingConflictNotice');
+  var noticeText = document.getElementById('bookingConflictText');
+  var submitButton = document.getElementById('saveBookingButton');
+  if (!venue || !startDate || !endDate || !startTime || !endTime || !notice || !noticeText || !submitButton) return;
+
+  function syncEndDate() {
+    if (!startDate.value) return;
+    endDate.min = startDate.value;
+    if (!endDate.value || endDate.value < startDate.value) {
+      endDate.value = startDate.value;
+    }
+  }
+
+  function getConflict() {
+    var venueId = Number(venue.value);
+    if (!venueId || !startDate.value || !endDate.value) return null;
+
+    var selectedStart;
+    var selectedEnd;
+
+    if (startTime.value && endTime.value) {
+      selectedStart = toDateTime(startDate.value, startTime.value, '00:00');
+      selectedEnd = toDateTime(endDate.value, endTime.value, '23:59');
+    } else {
+      selectedStart = toDateOnly(startDate.value);
+      selectedEnd = toDateTime(endDate.value, '23:59', '23:59');
+    }
+
+    return activeBookings.find(function (booking) {
+      if (booking.venueId !== venueId) return false;
+
+      var bookingStart = startTime.value && endTime.value
+        ? toDateTime(toInputDate(booking.startDate), toInputTime(booking.startTime), '00:00')
+        : toDateOnly(toInputDate(booking.startDate));
+      var bookingEnd = startTime.value && endTime.value
+        ? toDateTime(toInputDate(booking.endDate), toInputTime(booking.endTime), '23:59')
+        : toDateTime(toInputDate(booking.endDate), '23:59', '23:59');
+
+      return rangesOverlap(bookingStart, bookingEnd, selectedStart, selectedEnd);
+    }) || null;
+  }
+
+  function updateConflictNotice() {
+    var conflict = getConflict();
+
+    if (!conflict) {
+      notice.classList.add('hidden');
+      noticeText.textContent = '';
+      submitButton.disabled = false;
+      submitButton.classList.remove('cursor-not-allowed', 'opacity-60');
+      return;
+    }
+
+    noticeText.textContent = 'Bentrok dengan "' + conflict.eventName + '" pada ' + formatBookingRange(conflict) + '. Pilih tanggal atau waktu lain.';
+    notice.classList.remove('hidden');
+    submitButton.disabled = true;
+    submitButton.classList.add('cursor-not-allowed', 'opacity-60');
+  }
+
+  startDate.addEventListener('change', syncEndDate);
+  [venue, startDate, endDate, startTime, endTime].forEach(function (field) {
+    field.addEventListener('change', function () {
+      syncEndDate();
+      updateConflictNotice();
+    });
+    field.addEventListener('input', updateConflictNotice);
+  });
+  syncEndDate();
+  updateConflictNotice();
+})();
+</script>

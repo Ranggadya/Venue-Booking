@@ -8,8 +8,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { VenuesModule } from './venues/venues.module';
 import { EventBookingsModule } from './event-bookings/event-bookings.module';
 
-// Controller kecil khusus untuk handle root URL
-// Redirect GET / → /login agar tidak 404 saat buka localhost:3000
 @Controller()
 class RootController {
   @Get()

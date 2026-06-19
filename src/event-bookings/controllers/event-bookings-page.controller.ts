@@ -21,11 +21,9 @@ import { UpdateEventBookingDto } from '../dto/update-event-booking.dto';
 export class EventBookingsPageController {
   constructor(
     private readonly eventBookingsService: EventBookingsService,
-    // Inject VenuesService untuk mengisi dropdown venue di form create/edit
     private readonly venuesService: VenuesService,
   ) {}
 
-  // ─── GET /event-bookings ──────────────────────────────────────
   @Get()
   async index(
     @Query('search') search: string,
@@ -34,46 +32,40 @@ export class EventBookingsPageController {
     @Res() res: Response,
   ) {
     const currentPage = Number.parseInt(page ?? '1', 10);
+
     const result = await this.eventBookingsService.findPaginated(
       search,
       Number.isNaN(currentPage) ? 1 : currentPage,
     );
-    const user = req.user;
 
     return res.render('event-bookings/index', {
-      title: 'Event Bookings',
+      title: 'Event Bookings - Venue Booking',
+      pageTitle: 'Event Bookings',
       bookings: result.bookings,
       pagination: result.pagination,
       search: search ?? '',
-      user,
-      messages: {
-        success: req.flash('success'),
-        error: req.flash('error'),
-      },
+      success: req.flash('success'),
+      error: req.flash('error'),
     });
   }
 
-  // ─── GET /event-bookings/create ───────────────────────────────
   @Get('create')
   async createForm(@Req() req: Request, @Res() res: Response) {
-    // Load daftar venue untuk dropdown — hanya yang available saja ditampilkan
-    // Admin tidak bisa booking venue yang maintenance/inactive
     const venues = await this.venuesService.findAll();
-    const user = req.user;
+    const activeBookings = await this.eventBookingsService.findActiveSchedule();
+    const oldInput = this.getOldInput(req);
 
     return res.render('event-bookings/create', {
-      title: 'Tambah Booking',
-      // Kirim semua venue tapi nanti di view kita filter available
+      title: 'Create Event Booking - Venue Booking',
+      pageTitle: 'Create Event Booking',
       venues,
-      user,
-      messages: {
-        success: req.flash('success'),
-        error: req.flash('error'),
-      },
+      activeBookings,
+      oldInput,
+      success: req.flash('success'),
+      error: req.flash('error'),
     });
   }
 
-  // ─── POST /event-bookings ─────────────────────────────────────
   @Post()
   async create(
     @Body() body: CreateEventBookingDto,
@@ -82,17 +74,19 @@ export class EventBookingsPageController {
   ) {
     try {
       await this.eventBookingsService.create(body);
+
       req.flash('success', 'Booking berhasil dibuat');
       return res.redirect('/event-bookings');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Gagal membuat booking';
+
       req.flash('error', message);
+      req.flash('formData', JSON.stringify(body));
       return res.redirect('/event-bookings/create');
     }
   }
 
-  // ─── GET /event-bookings/:id ──────────────────────────────────
   @Get(':id')
   async show(
     @Param('id') id: string,
@@ -103,26 +97,23 @@ export class EventBookingsPageController {
       const booking = await this.eventBookingsService.findOneWithVenue(
         Number(id),
       );
-      const user = req.user;
 
       return res.render('event-bookings/show', {
-        title: `Detail Booking — ${booking.eventName}`,
+        title: `Detail Booking - ${booking.eventName}`,
+        pageTitle: 'Booking Detail',
         booking,
-        user,
-        messages: {
-          success: req.flash('success'),
-          error: req.flash('error'),
-        },
+        success: req.flash('success'),
+        error: req.flash('error'),
       });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Detail booking gagal dimuat';
+
       req.flash('error', message);
       return res.redirect('/event-bookings');
     }
   }
 
-  // ─── GET /event-bookings/:id/edit ─────────────────────────────
   @Get(':id/edit')
   async editForm(
     @Param('id') id: string,
@@ -134,27 +125,26 @@ export class EventBookingsPageController {
         Number(id),
       );
       const venues = await this.venuesService.findAll();
-      const user = req.user;
+      const oldInput = this.getOldInput(req);
 
       return res.render('event-bookings/edit', {
-        title: `Edit Booking — ${booking.eventName}`,
+        title: `Edit Booking - ${booking.eventName}`,
+        pageTitle: 'Edit Event Booking',
         booking,
         venues,
-        user,
-        messages: {
-          success: req.flash('success'),
-          error: req.flash('error'),
-        },
+        oldInput,
+        success: req.flash('success'),
+        error: req.flash('error'),
       });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Detail booking gagal dimuat';
+
       req.flash('error', message);
       return res.redirect('/event-bookings');
     }
   }
 
-  // ─── POST /event-bookings/:id/update ──────────────────────────
   @Post(':id/update')
   async update(
     @Param('id') id: string,
@@ -164,17 +154,19 @@ export class EventBookingsPageController {
   ) {
     try {
       await this.eventBookingsService.update(Number(id), body);
+
       req.flash('success', 'Booking berhasil diperbarui');
       return res.redirect(`/event-bookings/${id}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Gagal memperbarui booking';
+
       req.flash('error', message);
+      req.flash('formData', JSON.stringify(body));
       return res.redirect(`/event-bookings/${id}/edit`);
     }
   }
 
-  // ─── POST /event-bookings/:id/delete ──────────────────────────
   @Post(':id/delete')
   async remove(
     @Param('id') id: string,
@@ -183,13 +175,32 @@ export class EventBookingsPageController {
   ) {
     try {
       await this.eventBookingsService.remove(Number(id));
+
       req.flash('success', 'Booking berhasil dihapus');
       return res.redirect('/event-bookings');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Gagal menghapus booking';
+
       req.flash('error', message);
       return res.redirect(`/event-bookings/${id}`);
+    }
+  }
+
+  private getOldInput(req: Request): Record<string, unknown> {
+    const [raw] = req.flash('formData');
+
+    if (!raw) {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return parsed && typeof parsed === 'object'
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
     }
   }
 }

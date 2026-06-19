@@ -1,3 +1,12 @@
+<%
+  const form = typeof oldInput !== 'undefined' && oldInput ? oldInput : {};
+  const fieldValue = function (name, fallback) {
+    return form[name] !== undefined && form[name] !== null ? form[name] : fallback;
+  };
+  const oldPrice = fieldValue('price_per_day', '');
+  const oldPriceDisplay = oldPrice ? 'Rp ' + Number(oldPrice).toLocaleString('id-ID') : '';
+%>
+
 <!-- Breadcrumb -->
 <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-5">
   <a href="/venues" class="hover:text-blue-500 transition-colors">Venues</a>
@@ -18,7 +27,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-1.5">
           Venue Name <span class="text-red-400">*</span>
         </label>
-        <input type="text" name="name" required maxlength="150"
+        <input type="text" name="name" required maxlength="150" value="<%= fieldValue('name', '') %>"
           placeholder="e.g. Main Auditorium"
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 transition-colors" />
       </div>
@@ -27,7 +36,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-1.5">
           Location <span class="text-red-400">*</span>
         </label>
-        <input type="text" name="location" required maxlength="255"
+        <input type="text" name="location" required maxlength="255" value="<%= fieldValue('location', '') %>"
           placeholder="e.g. Building A, 2nd Floor"
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 transition-colors" />
       </div>
@@ -37,7 +46,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
             Capacity (people) <span class="text-red-400">*</span>
           </label>
-          <input type="number" name="capacity" required min="1"
+          <input type="number" name="capacity" required min="1" value="<%= fieldValue('capacity', '') %>"
             placeholder="e.g. 300"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 transition-colors" />
         </div>
@@ -45,8 +54,8 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">
             Price per Day (Rp) <span class="text-red-400">*</span>
           </label>
-          <input type="hidden" name="price_per_day" id="pricePerDayValue" />
-          <input type="text" id="pricePerDayDisplay" required inputmode="numeric"
+          <input type="hidden" name="price_per_day" id="pricePerDayValue" value="<%= oldPrice %>" />
+          <input type="text" id="pricePerDayDisplay" required inputmode="numeric" value="<%= oldPriceDisplay %>"
             placeholder="e.g. Rp 5.000.000"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 transition-colors" />
         </div>
@@ -58,9 +67,9 @@
         </label>
         <select name="status" required
           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 transition-colors">
-          <option value="available">Available</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="inactive">Inactive</option>
+          <option value="available" <%= fieldValue('status', 'available') === 'available' ? 'selected' : '' %>>Available</option>
+          <option value="maintenance" <%= fieldValue('status', 'available') === 'maintenance' ? 'selected' : '' %>>Maintenance</option>
+          <option value="inactive" <%= fieldValue('status', 'available') === 'inactive' ? 'selected' : '' %>>Inactive</option>
         </select>
       </div>
 
@@ -70,7 +79,7 @@
         </label>
         <textarea name="facilities" rows="2"
           placeholder="e.g. AC, Projector, Microphone, Sound System"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 resize-none transition-colors"></textarea>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 resize-none transition-colors"><%= fieldValue('facilities', '') %></textarea>
       </div>
 
       <div>
@@ -79,7 +88,7 @@
         </label>
         <textarea name="description" rows="3"
           placeholder="Additional description about this venue..."
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 resize-none transition-colors"></textarea>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-slate-50 placeholder-gray-400 resize-none transition-colors"><%= fieldValue('description', '') %></textarea>
       </div>
 
       <div class="flex items-center gap-3 pt-2">

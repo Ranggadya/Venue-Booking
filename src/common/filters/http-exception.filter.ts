@@ -52,6 +52,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return response.redirect('/login');
     }
 
+    if (request.method === 'POST') {
+      const formRedirectUrl = this.getFormRedirectUrl(request.url);
+
+      if (formRedirectUrl) {
+        request.flash('error', message);
+        request.flash('formData', JSON.stringify(request.body ?? {}));
+        return response.redirect(formRedirectUrl);
+      }
+    }
+
     if (status === HttpStatus.NOT_FOUND) {
       return response.status(status).render('errors/404', {
         layout: false,
@@ -100,5 +110,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
       500: 'Internal Server Error',
     };
     return map[status] ?? 'Error';
+  }
+
+  private getFormRedirectUrl(url: string): string | null {
+    if (url === '/event-bookings') {
+      return '/event-bookings/create';
+    }
+
+    const bookingUpdateMatch = url.match(/^\/event-bookings\/(\d+)\/update$/);
+    if (bookingUpdateMatch) {
+      return `/event-bookings/${bookingUpdateMatch[1]}/edit`;
+    }
+
+    if (url === '/venues') {
+      return '/venues/create';
+    }
+
+    const venueUpdateMatch = url.match(/^\/venues\/(\d+)\/update$/);
+    if (venueUpdateMatch) {
+      return `/venues/${venueUpdateMatch[1]}/edit`;
+    }
+
+    return null;
   }
 }

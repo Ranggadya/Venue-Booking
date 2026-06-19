@@ -1,8 +1,8 @@
-# DESIGN.md — Smart Venue & Event Booking Management Dashboard
+# DESIGN.md — Venue Event Booking Management Dashboard
 
 ## 1. Tujuan Dokumen
 
-Dokumen ini berisi rancangan UI/UX dan arahan implementasi frontend untuk **Smart Venue & Event Booking Management**, khususnya bagian **admin dashboard** dan halaman manajemen data. Desain dashboard mengikuti referensi visual pada gambar yang diberikan: clean admin panel, sidebar putih, konten dengan background abu kebiruan yang soft, card statistik berwarna gradient, rounded corner besar, shadow halus, chart area, overview panel, dan tabel aktivitas.
+Dokumen ini berisi rancangan UI/UX dan arahan implementasi frontend untuk **Venue Event Booking Management**, khususnya bagian **admin dashboard** dan halaman manajemen data. Desain dashboard mengikuti referensi visual pada gambar yang diberikan: clean admin panel, sidebar putih, konten dengan background abu kebiruan yang soft, card statistik berwarna gradient, rounded corner besar, shadow halus, chart area, overview panel, dan tabel aktivitas.
 
 Dokumen ini dibuat supaya ketika implementasi EJS + Tailwind CSS dilakukan, tampilan antar halaman tetap konsisten, modern, dan terlihat seperti dashboard SaaS profesional.
 
@@ -45,7 +45,7 @@ Target kesan yang ingin dibangun:
 Nama aplikasi tetap menggunakan nama project utama:
 
 ```txt
-Smart Venue
+Venue
 ```
 
 Untuk tampilan brand di sidebar, bisa menggunakan nama pendek:
@@ -60,7 +60,7 @@ Alternatif nama brand jika ingin lebih modern:
 VenueHub
 VenueFlow
 VenueSpace
-SmartVenue
+VenueCore
 VenueBoard
 ```
 
@@ -1164,6 +1164,6 @@ Gunakan checklist ini sebelum project direkam untuk video demo.
 
 ## 34. Kesimpulan Desain
 
-Desain dashboard Smart Venue & Event Booking Management diarahkan menjadi admin panel modern dengan gaya clean, soft, dan profesional. Visual utamanya mengadaptasi dashboard referensi: sidebar putih, topbar minimal, background abu kebiruan, statistic cards gradient, chart card, overview panel, dan activity table.
+Desain dashboard Venue Event Booking Management diarahkan menjadi admin panel modern dengan gaya clean, soft, dan profesional. Visual utamanya mengadaptasi dashboard referensi: sidebar putih, topbar minimal, background abu kebiruan, statistic cards gradient, chart card, overview panel, dan activity table.
 
 Untuk kebutuhan project fullstack NestJS MVC dengan EJS + Tailwind CSS, desain ini cukup realistis untuk diimplementasikan tanpa terlalu banyak dependency tambahan. Fokus utama UI adalah membantu admin memantau venue, booking, status booking, status pembayaran, serta aktivitas terbaru secara cepat dan jelas.

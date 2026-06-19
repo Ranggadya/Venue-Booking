@@ -56,7 +56,8 @@ model EventBooking {
   venueId       Int           @map("venue_id")
   eventName     String        @db.VarChar(150) @map("event_name")
   organizerName String        @db.VarChar(100) @map("organizer_name")
-  eventDate     DateTime      @db.Date @map("event_date")
+  startDate     DateTime      @db.Date @map("start_date")
+  endDate       DateTime      @db.Date @map("end_date")
   startTime     DateTime      @db.Time(6) @map("start_time")
   endTime       DateTime      @db.Time(6) @map("end_time")
   attendees     Int?

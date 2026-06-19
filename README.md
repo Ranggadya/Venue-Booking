@@ -1,8 +1,8 @@
-# Smart Venue & Event Booking Management
+# Venue Event Booking Management
 
 <div align="center">
 
-![Smart Venue Banner](./screenshots/banner.png)
+![Venue Banner](./public/dashboard.png)
 
 **Platform admin panel berbasis web untuk mengelola data venue dan jadwal event secara terpusat.**
 
@@ -18,7 +18,7 @@
 
 ## 📋 Deskripsi Project
 
-Smart Venue & Event Booking Management adalah aplikasi admin panel berbasis web yang membantu pengelola venue mencatat data venue dan jadwal event secara terpusat. Sistem ini digunakan oleh admin untuk:
+Venue Event Booking Management adalah aplikasi admin panel berbasis web yang membantu pengelola venue mencatat data venue dan jadwal event secara terpusat. Sistem ini digunakan oleh admin untuk:
 
 - Mengelola data venue (CRUD)
 - Membuat dan mengelola event booking
@@ -34,7 +34,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Login Page
 
-![Login Page](./screenshots/login.png)
+![Login Page](./public/Business%20and%20Finance%20_%20Business%20and%20Finance%2C%20Communication%2C%20Error%20and%20404%2C%20Vector%20illustration.svg)
 
 > Halaman login admin dengan form email dan password. Tampilan dua kolom dengan visual panel di kiri (desktop) dan form di kanan.
 
@@ -42,7 +42,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Dashboard
 
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./public/dashboard.png)
 
 > Dashboard utama menampilkan 4 stat cards berwarna gradient (Total Venues, Total Bookings, Confirmed, Pending), booking trend chart, overview panel dengan progress bars, dan tabel recent bookings.
 
@@ -50,7 +50,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Venue List
 
-![Venue List](./screenshots/venues-index.png)
+![Venue List](./public/venues.png)
 
 > Halaman daftar venue dengan fitur search dan tombol Add Venue. Tabel menampilkan nama, lokasi, kapasitas, harga per hari, status badge, dan tombol aksi (View, Edit, Delete).
 
@@ -58,7 +58,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Venue Detail
 
-![Venue Detail](./screenshots/venues-show.png)
+![Venue Detail](./public/venues-show.png)
 
 > Halaman detail venue menampilkan informasi lengkap venue di kolom kiri dan Quick Stats + Quick Actions di kolom kanan. Bagian bawah memuat tabel riwayat booking terkait venue tersebut.
 
@@ -66,7 +66,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Create Venue
 
-![Create Venue](./screenshots/venues-create.png)
+![Create Venue](./public/venues-create.png)
 
 > Form tambah venue dengan field: Venue Name, Location, Capacity, Price per Day, Status, Facilities, dan Description.
 
@@ -74,7 +74,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Edit Venue
 
-![Edit Venue](./screenshots/venues-edit.png)
+![Edit Venue](./public/venues-edit.png)
 
 > Form edit venue dengan pre-fill data yang sudah ada. Dropdown status menampilkan nilai aktif saat ini.
 
@@ -82,7 +82,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Event Booking List
 
-![Booking List](./screenshots/bookings-index.png)
+![Booking List](./public/bookings.png)
 
 > Halaman daftar event booking dengan search bar. Tabel menampilkan nama event, venue, tanggal & waktu, jumlah peserta, status booking, status pembayaran, dan tombol aksi.
 
@@ -90,7 +90,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Event Booking Detail
 
-![Booking Detail](./screenshots/bookings-show.png)
+![Booking Detail](./public/bookings-show.png)
 
 > Halaman detail booking dengan layout dua kolom. Kolom kiri menampilkan informasi booking lengkap, kolom kanan menampilkan info venue yang digunakan.
 
@@ -98,7 +98,7 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Create Event Booking
 
-![Create Booking](./screenshots/bookings-create.png)
+![Create Booking](./public/bookings-create.png)
 
 > Form tambah booking dengan dropdown venue (hanya venue available), field tanggal, waktu mulai-selesai, jumlah peserta, status booking, status pembayaran, dan catatan.
 
@@ -106,31 +106,13 @@ Project ini menggunakan pendekatan **NestJS MVC dengan Server-Side Rendering (SS
 
 ### Edit Event Booking
 
-![Edit Booking](./screenshots/bookings-edit.png)
+![Edit Booking](./public/bookings-edit.png)
 
 > Form edit booking dengan pre-fill semua field termasuk konversi waktu dari database ke format `HH:MM` untuk input time.
 
 ---
 
-### Error 404
-
-![Error 404](./screenshots/error-404.png)
-
-> Halaman 404 yang tampil saat URL tidak ditemukan, dengan tombol navigasi kembali ke dashboard.
-
----
-
-### Swagger API Docs
-
-![Swagger](./screenshots/swagger.png)
-
-> Halaman dokumentasi API otomatis dari Swagger UI yang dapat diakses di `/api-docs`. Mendukung test endpoint langsung dengan Bearer token.
-
----
-
-## 🗃️ ERD (Entity Relationship Diagram)
-
-![ERD Diagram](./screenshots/erd.png)
+## ERD (Entity Relationship Diagram)
 
 > ERD dibuat menggunakan [dbdiagram.io](https://dbdiagram.io)
 
@@ -424,8 +406,6 @@ smart-venue-booking/
 │   └── js/
 │       └── app.js
 │
-├── screenshots/               # Screenshot semua halaman (untuk README)
-│
 ├── .env                       # Environment variables (tidak di-commit)
 ├── .env.example               # Template environment variables
 ├── .gitignore
@@ -508,18 +488,18 @@ npx prisma db seed
 
 Output yang diharapkan:
 ```
-🌱 Seeding database...
+ Seeding database...
 
-✅ Admin: admin@venue.com
+ Admin: admin@venue.com
   ✓ Venue: Aula Utama
   ✓ Venue: Ruang Seminar B
   ✓ Venue: Ballroom Grand
   ✓ Venue: Meeting Room Eksekutif
   ✓ Venue: Ruang Workshop
-✅ Venues: 5 data
-✅ Event Bookings: 15 data
+ Venues: 5 data
+ Event Bookings: 15 data
 
-🎉 Seeding selesai!
+ Seeding selesai!
 ```
 
 **7. Build Tailwind CSS**
@@ -536,7 +516,7 @@ npm run start:dev
 
 ---
 
-## 🌐 Akses Aplikasi
+##  Akses Aplikasi
 
 | URL | Keterangan |
 |-----|------------|
@@ -555,7 +535,7 @@ npm run start:dev
 
 ---
 
-## 📡 API Endpoints
+##  API Endpoints
 
 ### Auth
 
@@ -640,7 +620,7 @@ npm run start:dev
 
 ---
 
-## 📮 Postman Collection
+##  Postman Collection
 
 Import file `smart-venue-booking.postman_collection.json` ke Postman.
 
@@ -659,7 +639,7 @@ Collection sudah berisi:
 
 ---
 
-## 📐 Aturan Bisnis
+##  Aturan Bisnis
 
 ### Venue
 
@@ -693,7 +673,7 @@ Booking berstatus 'cancelled' tidak dianggap konflik.
 
 ---
 
-## 🔒 Authentication Flow
+##  Authentication Flow
 
 ### Halaman Admin (Session-based)
 
@@ -724,7 +704,7 @@ Request ke API lain:
 
 ---
 
-## ⚠️ Error Handling
+##  Error Handling
 
 Semua error ditangani oleh `AllExceptionsFilter` secara global.
 
@@ -752,9 +732,9 @@ Semua error ditangani oleh `AllExceptionsFilter` secara global.
 
 ---
 
-## 🎞️ Video Demo
+##  Video Demo
 
-📺 Link video demo: `[Tambahkan link video Loom/YouTube di sini]`
+ Link video demo: `[Tambahkan link video Loom/YouTube di sini]`
 
 **Konten video demo:**
 1. Penjelasan singkat project dan tech stack
@@ -769,23 +749,6 @@ Semua error ditangani oleh `AllExceptionsFilter` secara global.
 10. Demo search venue dan booking
 11. Demo API testing via Postman dengan JWT
 12. Penjelasan struktur folder dan arsitektur MVC
-
----
-
-## 📦 Scripts
-
-| Script | Perintah | Keterangan |
-|--------|----------|------------|
-| Development | `npm run start:dev` | Jalankan dengan hot reload + watch CSS |
-| Build CSS | `npm run build:css` | Build Tailwind CSS sekali |
-| Watch CSS | `npm run watch:css` | Watch perubahan CSS |
-| Build | `npm run build` | Build NestJS untuk production |
-| Production | `npm run start:prod` | Jalankan hasil build |
-| Lint | `npm run lint` | Jalankan ESLint |
-| Format | `npm run format` | Jalankan Prettier |
-| Migration | `npx prisma migrate dev` | Jalankan migration baru |
-| Seed | `npx prisma db seed` | Isi data awal |
-| Studio | `npx prisma studio` | Buka Prisma Studio (GUI database) |
 
 ---
 
@@ -813,7 +776,7 @@ JWT_EXPIRES_IN=1d
 
 ---
 
-## 📋 Scope & Limitations
+##  Scope & Limitations
 
 ### Dalam Scope
 
@@ -844,7 +807,7 @@ JWT_EXPIRES_IN=1d
 
 ---
 
-## 👤 Author
+##  Author
 
 **Dya**
 
@@ -852,12 +815,8 @@ JWT_EXPIRES_IN=1d
 
 ---
 
-## 📄 Lisensi
+##  Lisensi
 
 Project ini dibuat untuk keperluan portfolio dan challenge fullstack TypeScript.
 
 ---
-
-<div align="center">
-  <p>Dibuat dengan ❤️ menggunakan NestJS, TypeScript, dan Tailwind CSS</p>
-</div>
