@@ -27,10 +27,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? this.extractMessage(exception)
         : 'Terjadi kesalahan pada server';
 
-    this.logger.error(
-      `[${request.method}] ${request.url} → ${status}: ${message}`,
-      exception instanceof Error ? exception.stack : String(exception),
-    );
+    const logMessage = `[${request.method}] ${request.url} → ${status}: ${message}`;
+
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(
+        logMessage,
+        exception instanceof Error ? exception.stack : String(exception),
+      );
+    } else {
+      this.logger.warn(logMessage);
+    }
 
     const isApiRequest = request.url.startsWith('/api/');
 

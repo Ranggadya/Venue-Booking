@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Smart Venue & Event Booking Management",
-    "description": "API collection untuk testing Smart Venue & Event Booking Management.\n\n## Setup\n1. Import collection ini ke Postman\n2. Set variable `base_url` = `http://localhost:3000`\n3. Jalankan request **[Auth] Login** → copy nilai `access_token`\n4. Set variable `token` = nilai `access_token`\n5. Semua request lain sudah otomatis menggunakan token tersebut\n\n## Demo Account\n- Email: admin@venue.com\n- Password: admin123",
+    "description": "API collection untuk testing Smart Venue & Event Booking Management.\n\n## Setup\n1. Import collection ini ke Postman\n2. Set variable `base_url` = `http://localhost:3000`\n3. Jalankan request **[Auth] Login** → copy nilai `access_token`\n4. Set variable `token` = nilai `access_token`\n5. Semua request lain sudah otomatis menggunakan token tersebut\n\n## Demo Account\n- Email: admin@smartvenue.id\n- Password: Admin@1234",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -28,6 +28,61 @@
       "value": "1",
       "type": "string",
       "description": "ID booking untuk testing. Ganti sesuai data yang ada."
+    },
+    {
+      "key": "available_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "active_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "empty_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "low_capacity_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "unavailable_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "created_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_start_date",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_end_date",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_start_time",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_end_time",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -42,12 +97,13 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "// Otomatis simpan token ke collection variable setelah login",
+                  "// Otomatis simpan token setelah login berhasil",
                   "if (pm.response.code === 200) {",
                   "  const response = pm.response.json();",
                   "  if (response.access_token) {",
                   "    pm.collectionVariables.set('token', response.access_token);",
-                  "    console.log('✅ Token saved to collection variable');",
+                  "    pm.environment.set('token', response.access_token);",
+                  "    console.log('Token saved to collection and environment variables');",
                   "  }",
                   "}",
                   "",
@@ -75,12 +131,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@venue.com\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"email\": \"admin@smartvenue.id\",\n  \"password\": \"Admin@1234\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "description": "Login dengan akun admin untuk mendapatkan JWT Bearer token.\n\nSetelah request berhasil, token akan otomatis tersimpan ke collection variable `token` melalui test script."
           }
@@ -116,12 +178,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@venue.com\",\n  \"password\": \"wrongpassword\"\n}"
+              "raw": "{\n  \"email\": \"admin@smartvenue.id\",\n  \"password\": \"wrongpassword\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "description": "Test login dengan password salah. Expected: 401 Unauthorized."
           }
@@ -156,12 +224,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"bukan-email\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"email\": \"bukan-email\",\n  \"password\": \"Admin@1234\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "description": "Test login dengan format email tidak valid. Expected: 400 Bad Request dari ValidationPipe."
           }
@@ -186,8 +260,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/venues",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
             },
             "description": "Test akses endpoint tanpa Bearer token. Expected: 401 Unauthorized."
           }
@@ -214,20 +293,20 @@
                   "  pm.expect(json).to.be.an('array');",
                   "});",
                   "",
-                  "pm.test('Each venue has required fields', () => {",
-                  "  const json = pm.response.json();",
-                  "  if (json.length > 0) {",
-                  "    const venue = json[0];",
-                  "    pm.expect(venue).to.have.property('id');",
-                  "    pm.expect(venue).to.have.property('name');",
-                  "    pm.expect(venue).to.have.property('location');",
-                  "    pm.expect(venue).to.have.property('capacity');",
-                  "    pm.expect(venue).to.have.property('status');",
-                  "    pm.expect(venue).to.have.property('pricePerDay');",
-                  "    // Simpan ID venue pertama untuk test lain",
-                  "    pm.collectionVariables.set('venue_id', venue.id);",
-                  "    console.log('venue_id set to:', venue.id);",
-                  "  }",
+                  "pm.test('Store reusable venue IDs', () => {",
+                  "  const venues = pm.response.json();",
+                  "  pm.expect(venues.length).to.be.greaterThan(0);",
+                  "  const available = venues.find(v => v.status === 'available') || venues[0];",
+                  "  const active = venues.find(v => (v.activeBookingCount || (v._count && v._count.bookings) || 0) > 0) || available;",
+                  "  const empty = venues.find(v => ((v._count && v._count.bookings) || 0) === 0) || available;",
+                  "  const lowCapacity = venues.slice().sort((a, b) => Number(a.capacity) - Number(b.capacity))[0] || available;",
+                  "  const unavailable = venues.find(v => v.status !== 'available');",
+                  "  pm.collectionVariables.set('venue_id', available.id);",
+                  "  pm.collectionVariables.set('available_venue_id', available.id);",
+                  "  pm.collectionVariables.set('active_venue_id', active.id);",
+                  "  pm.collectionVariables.set('empty_venue_id', empty.id);",
+                  "  pm.collectionVariables.set('low_capacity_venue_id', lowCapacity.id);",
+                  "  if (unavailable) pm.collectionVariables.set('unavailable_venue_id', unavailable.id);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -244,8 +323,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
             },
             "description": "Ambil semua data venue. Response berupa array of venue objects."
           }
@@ -291,8 +375,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues?search=aula",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -316,8 +405,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues?search=available",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -361,8 +455,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues/{{venue_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "{{venue_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{venue_id}}"
+              ]
             },
             "description": "Ambil detail venue beserta list booking terkait. Response menyertakan array `bookings`."
           }
@@ -398,8 +498,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues/99999",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "99999"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "99999"
+              ]
             },
             "description": "Test get venue dengan ID yang tidak ada. Expected: 404 Not Found."
           }
@@ -423,6 +529,7 @@
                   "  // Simpan ID untuk keperluan test update/delete",
                   "  pm.collectionVariables.set('venue_id', json.id);",
                   "  console.log('New venue_id:', json.id);",
+                  "  pm.collectionVariables.set('created_venue_id', json.id);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -447,8 +554,13 @@
             },
             "url": {
               "raw": "{{base_url}}/api/venues",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
             },
             "description": "Buat venue baru. Semua field wajib kecuali `facilities` dan `description`."
           }
@@ -492,8 +604,13 @@
             },
             "url": {
               "raw": "{{base_url}}/api/venues",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
             },
             "description": "Test create venue dengan data tidak valid. Expected: 400 Bad Request dengan pesan validasi."
           }
@@ -537,8 +654,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/venues/{{venue_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "{{venue_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{venue_id}}"
+              ]
             },
             "description": "Update sebagian data venue. Hanya field yang dikirim yang akan diupdate (partial update)."
           }
@@ -562,12 +685,37 @@
               "raw": "{\n  \"status\": \"maintenance\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/venues/{{venue_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "{{venue_id}}"]
+              "raw": "{{base_url}}/api/venues/{{created_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{created_venue_id}}"
+              ]
             },
             "description": "Ubah status venue menjadi maintenance. Venue dengan status ini tidak bisa menerima booking baru."
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Venue set to maintenance', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.equal('maintenance');",
+                  "  pm.collectionVariables.set('unavailable_venue_id', json.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "[Venues] DELETE Venue — Success",
@@ -600,8 +748,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues/{{venue_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "{{venue_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{venue_id}}"
+              ]
             },
             "description": "Hapus venue. Akan gagal (400) jika venue masih memiliki booking aktif (pending/confirmed)."
           }
@@ -637,8 +791,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues", "1"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "1"
+              ]
             },
             "description": "Test delete venue yang masih punya booking aktif (Aula Utama, ID 1). Expected: 400 Bad Request.\n\nGanti ID sesuai venue yang memiliki booking pending/confirmed di database kamu."
           }
@@ -665,14 +825,16 @@
                   "  pm.expect(json).to.be.an('array');",
                   "});",
                   "",
-                  "pm.test('Each booking has venue relation', () => {",
-                  "  const json = pm.response.json();",
-                  "  if (json.length > 0) {",
-                  "    pm.expect(json[0]).to.have.property('venue');",
-                  "    pm.expect(json[0].venue).to.have.property('name');",
-                  "    // Simpan ID booking pertama",
-                  "    pm.collectionVariables.set('booking_id', json[0].id);",
-                  "    console.log('booking_id set to:', json[0].id);",
+                  "pm.test('Store reusable booking/conflict IDs', () => {",
+                  "  const bookings = pm.response.json();",
+                  "  if (bookings.length > 0) {",
+                  "    const booking = bookings.find(b => b.bookingStatus !== \"cancelled\") || bookings[0];",
+                  "    pm.collectionVariables.set('booking_id', booking.id);",
+                  "    pm.collectionVariables.set('conflict_venue_id', booking.venueId || (booking.venue && booking.venue.id));",
+                  "    pm.collectionVariables.set('conflict_start_date', new Date(booking.startDate).toISOString().slice(0, 10));",
+                  "    pm.collectionVariables.set('conflict_end_date', new Date(booking.endDate).toISOString().slice(0, 10));",
+                  "    pm.collectionVariables.set('conflict_start_time', new Date(booking.startTime).toISOString().slice(11, 16));",
+                  "    pm.collectionVariables.set('conflict_end_time', new Date(booking.endTime).toISOString().slice(11, 16));",
                   "  }",
                   "});"
                 ],
@@ -690,8 +852,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Ambil semua data booking. Response menyertakan relasi venue (include: { venue: true })."
           }
@@ -708,8 +875,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings?search=seminar",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -732,8 +904,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings?search=ballroom",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -756,8 +933,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings?search=confirmed",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -802,8 +984,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{booking_id}}"
+              ]
             },
             "description": "Ambil detail booking beserta informasi venue terkait."
           }
@@ -833,8 +1021,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings/99999",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "99999"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "99999"
+              ]
             },
             "description": "Test get booking dengan ID tidak ada. Expected: 404 Not Found."
           }
@@ -878,14 +1072,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 2,\n  \"event_name\": \"Test Event Baru\",\n  \"organizer_name\": \"Testing Organization\",\n  \"event_date\": \"2026-09-01\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 50,\n  \"booking_status\": \"pending\",\n  \"payment_status\": \"unpaid\",\n  \"notes\": \"Ini adalah booking untuk testing Postman.\"\n}"
+              "raw": "{\n  \"venue_id\": {{available_venue_id}},\n  \"event_name\": \"Test Event Baru\",\n  \"organizer_name\": \"Testing Organization\",\n  \"start_date\": \"2026-09-01\",\n  \"end_date\": \"2026-09-01\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 50,\n  \"booking_status\": \"pending\",\n  \"payment_status\": \"unpaid\",\n  \"notes\": \"Ini adalah booking untuk testing Postman.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
-            "description": "Buat booking baru.\n\n**Field wajib:** venue_id, event_name, organizer_name, event_date, start_time, end_time\n**Field opsional:** attendees, booking_status, payment_status, notes\n\nFormat: event_date = YYYY-MM-DD, start_time/end_time = HH:MM"
+            "description": "Buat booking baru.\n\n**Field wajib:** venue_id, event_name, organizer_name, start_date, end_date, start_time, end_time\n**Field opsional:** attendees, booking_status, payment_status, notes\n\nFormat: start_date/end_date = YYYY-MM-DD, start_time/end_time = HH:MM"
           }
         },
         {
@@ -926,14 +1125,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 5,\n  \"event_name\": \"Event di Venue Maintenance\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-10\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 30\n}"
+              "raw": "{\n  \"venue_id\": {{unavailable_venue_id}},\n  \"event_name\": \"Event di Venue Maintenance\",\n  \"organizer_name\": \"Test Organizer\",\n  \"start_date\": \"2026-09-10\",\n  \"end_date\": \"2026-09-10\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 30\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
-            "description": "Test booking ke venue yang berstatus maintenance (Ruang Workshop, ID 5). Expected: 400 Bad Request.\n\nGanti venue_id sesuai ID venue maintenance di database kamu."
+            "description": "Test booking ke venue yang berstatus maintenance (Studio Rekaman Harmoni, ID 6 jika database dari seed). Expected: 400 Bad Request.\n\nGanti venue_id sesuai ID venue maintenance di database kamu."
           }
         },
         {
@@ -971,12 +1175,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 4,\n  \"event_name\": \"Event Melebihi Kapasitas\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 999\n}"
+              "raw": "{\n  \"venue_id\": {{low_capacity_venue_id}},\n  \"event_name\": \"Event Melebihi Kapasitas\",\n  \"organizer_name\": \"Test Organizer\",\n  \"start_date\": \"2026-09-15\",\n  \"end_date\": \"2026-09-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 999\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Test booking dengan jumlah peserta melebihi kapasitas venue.\n\nMeeting Room Eksekutif (ID 4) kapasitas 20 orang, kita kirim 999 peserta. Expected: 400 Bad Request."
           }
@@ -1016,12 +1225,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 2,\n  \"event_name\": \"Event Waktu Salah\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-20\",\n  \"start_time\": \"14:00\",\n  \"end_time\": \"09:00\",\n  \"attendees\": 50\n}"
+              "raw": "{\n  \"venue_id\": {{available_venue_id}},\n  \"event_name\": \"Event Waktu Salah\",\n  \"organizer_name\": \"Test Organizer\",\n  \"start_date\": \"2026-09-20\",\n  \"end_date\": \"2026-09-20\",\n  \"start_time\": \"14:00\",\n  \"end_time\": \"09:00\",\n  \"attendees\": 50\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Test booking dengan end_time lebih kecil dari start_time (14:00 → 09:00). Expected: 400 Bad Request."
           }
@@ -1062,14 +1276,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 1,\n  \"event_name\": \"Event Bentrok\",\n  \"organizer_name\": \"Test Conflict Organizer\",\n  \"event_date\": \"2026-06-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"11:00\",\n  \"attendees\": 100\n}"
+              "raw": "{\n  \"venue_id\": {{conflict_venue_id}},\n  \"event_name\": \"Event Bentrok\",\n  \"organizer_name\": \"Test Conflict Organizer\",\n  \"start_date\": \"{{conflict_start_date}}\",\n  \"end_date\": \"{{conflict_end_date}}\",\n  \"start_time\": \"{{conflict_start_time}}\",\n  \"end_time\": \"{{conflict_end_time}}\",\n  \"attendees\": 100\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
-            "description": "Test booking yang jadwalnya bertabrakan dengan booking yang sudah ada.\n\nAula Utama (ID 1) pada 2026-06-15 sudah ada booking 08:00–12:00. Kita coba booking 09:00–11:00 di venue dan tanggal yang sama. Expected: 409 Conflict.\n\nLogika overlap: start_baru(09:00) < end_lama(12:00) AND end_baru(11:00) > start_lama(08:00) → BENTROK."
+            "description": "Test booking yang jadwalnya bertabrakan dengan booking seed.\n\nGrand Ballroom Nusantara (ID 1 jika database dari seed) pada 2026-07-05 sudah ada booking 18:00-23:00. Kita coba booking 19:00-21:00 di venue dan tanggal yang sama. Expected: 409 Conflict."
           }
         },
         {
@@ -1101,12 +1320,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 99999,\n  \"event_name\": \"Event Venue Tidak Ada\",\n  \"organizer_name\": \"Test Organizer\",\n  \"event_date\": \"2026-09-25\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\"\n}"
+              "raw": "{\n  \"venue_id\": 99999,\n  \"event_name\": \"Event Venue Tidak Ada\",\n  \"organizer_name\": \"Test Organizer\",\n  \"start_date\": \"2026-09-25\",\n  \"end_date\": \"2026-09-25\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Test booking dengan venue_id yang tidak ada. Expected: 404 Not Found."
           }
@@ -1150,8 +1374,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{booking_id}}"
+              ]
             },
             "description": "Update sebagian data booking. Partial update — hanya field yang dikirim yang berubah.\n\nUmum dipakai untuk mengubah status booking atau status pembayaran."
           }
@@ -1176,8 +1406,14 @@
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{booking_id}}"
+              ]
             },
             "description": "Batalkan booking dan set payment status menjadi refunded.\n\nBooking yang sudah cancelled tidak akan dianggap conflict saat ada booking baru di jadwal yang sama."
           }
@@ -1198,12 +1434,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"event_date\": \"2026-10-01\",\n  \"start_time\": \"10:00\",\n  \"end_time\": \"14:00\",\n  \"attendees\": 45\n}"
+              "raw": "{\n  \"start_date\": \"2026-10-01\",\n  \"end_date\": \"2026-10-01\",\n  \"start_time\": \"10:00\",\n  \"end_time\": \"14:00\",\n  \"attendees\": 45\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{booking_id}}"
+              ]
             },
             "description": "Update jadwal booking ke tanggal dan waktu baru yang tidak bentrok dengan booking lain.\n\nSaat update, sistem mengecualikan booking ini sendiri dari pengecekan conflict (menggunakan excludeId)."
           }
@@ -1239,8 +1481,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/event-bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{booking_id}}"
+              ]
             },
             "description": "Hapus booking. Booking bisa dihapus kapan saja tanpa syarat status."
           }
@@ -1271,8 +1519,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Akses endpoint tanpa token. Expected: 401 Unauthorized."
           }
@@ -1302,8 +1555,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/venues",
-              "host": ["{{base_url}}"],
-              "path": ["api", "venues"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
             },
             "description": "Akses endpoint dengan token tidak valid. Expected: 401 Unauthorized."
           }
@@ -1345,14 +1603,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"venue_id\": 3,\n  \"event_name\": \"Acara Bentrok Ballroom\",\n  \"organizer_name\": \"Conflict Tester\",\n  \"event_date\": \"2026-06-28\",\n  \"start_time\": \"19:00\",\n  \"end_time\": \"21:00\",\n  \"attendees\": 200\n}"
+              "raw": "{\n  \"venue_id\": {{conflict_venue_id}},\n  \"event_name\": \"Acara Bentrok Ballroom\",\n  \"organizer_name\": \"Conflict Tester\",\n  \"start_date\": \"{{conflict_start_date}}\",\n  \"end_date\": \"{{conflict_end_date}}\",\n  \"start_time\": \"{{conflict_start_time}}\",\n  \"end_time\": \"{{conflict_end_time}}\",\n  \"attendees\": 200\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
-            "description": "Test conflict detection.\n\nBallroom Grand (ID 3) pada 2026-06-28 sudah ada booking 18:00–23:00 (Gala Dinner). Kita coba booking 19:00–21:00 di tanggal yang sama.\n\nLogika: start_baru(19:00) < end_lama(23:00) AND end_baru(21:00) > start_lama(18:00) → BENTROK\n\nExpected: 409 Conflict dengan pesan yang menyebut nama booking konflik."
+            "description": "Test conflict detection.\n\nGrand Ballroom Nusantara (ID 1 jika database dari seed) pada 2026-07-05 sudah ada booking 18:00-23:00. Kita coba booking 19:00-21:00 di tanggal yang sama. Expected: 409 Conflict dengan pesan yang menyebut jadwal konflik."
           }
         },
         {
@@ -1390,12 +1653,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{}"
+              "raw": "{\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/event-bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
             },
             "description": "Test kirim body kosong ke endpoint create booking. ValidationPipe akan menolak karena field wajib tidak ada. Expected: 400 Bad Request."
           }

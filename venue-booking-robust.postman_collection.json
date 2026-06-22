@@ -1,0 +1,1682 @@
+{
+  "info": {
+    "name": "Smart Venue Booking - Robust API Testing",
+    "description": "Collection Postman yang lebih tahan banting untuk demo API Smart Venue & Event Booking Management. Collection ini membuat data testing sendiri dulu, jadi tidak bergantung pada ID seed seperti venue 1, 2, 4, atau 6. Jalankan dari atas ke bawah memakai Collection Runner.\n\nUrutan aman: Auth Login → Setup Data → API Tests → Cleanup.\n\nDefault account dari seed:\n- email: admin@smartvenue.id\n- password: Admin@1234",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "available_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "maintenance_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "small_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "active_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "active_booking_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_booking_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "crud_booking_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "delete_venue_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamic_date",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "unique_suffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conflict_date",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Auth",
+      "item": [
+        {
+          "name": "Login Admin - Save Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Response has access_token', () => { pm.expect(json.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('token', json.access_token);",
+                  "console.log('JWT token saved');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@smartvenue.id\",\n  \"password\": \"Admin@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login admin dan simpan JWT ke variable token."
+          }
+        },
+        {
+          "name": "Login Wrong Password - 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has message', () => pm.expect(json).to.have.property('message'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@smartvenue.id\",\n  \"password\": \"wrong-password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Negative test login."
+          }
+        },
+        {
+          "name": "Protected Route Without Token - 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "Pastikan endpoint protected menolak request tanpa token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Setup Dynamic Test Data",
+      "description": "Membuat data sendiri agar test tidak bergantung pada seed ID tertentu.",
+      "item": [
+        {
+          "name": "Create Available Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "Venue available untuk test create/update booking.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Available Venue {{$timestamp}}\",\n  \"location\": \"Postman Test Area\",\n  \"capacity\": 300,\n  \"facilities\": \"AC, Proyektor, Sound System\",\n  \"price_per_day\": 2500000,\n  \"status\": \"available\",\n  \"description\": \"Venue available khusus testing Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('available_venue_id', String(json.id));",
+                  "console.log('available_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Maintenance Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Maintenance Venue {{$timestamp}}\",\n  \"location\": \"Maintenance Area\",\n  \"capacity\": 120,\n  \"facilities\": \"AC\",\n  \"price_per_day\": 1000000,\n  \"status\": \"maintenance\",\n  \"description\": \"Venue maintenance untuk negative test.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('maintenance_venue_id', String(json.id));",
+                  "console.log('maintenance_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Small Capacity Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Small Venue {{$timestamp}}\",\n  \"location\": \"Small Room\",\n  \"capacity\": 10,\n  \"facilities\": \"Whiteboard\",\n  \"price_per_day\": 500000,\n  \"status\": \"available\",\n  \"description\": \"Venue kecil untuk test kapasitas.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('small_venue_id', String(json.id));",
+                  "console.log('small_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Active Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Active Venue {{$timestamp}}\",\n  \"location\": \"Active Booking Area\",\n  \"capacity\": 200,\n  \"facilities\": \"AC, Stage\",\n  \"price_per_day\": 2200000,\n  \"status\": \"available\",\n  \"description\": \"Venue untuk test delete venue yang masih punya booking aktif.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('active_venue_id', String(json.id));",
+                  "console.log('active_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Active Booking for Active Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "Membuat booking aktif agar test delete venue dengan active booking tidak bergantung seed.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{active_venue_id}},\n  \"event_name\": \"Postman Active Booking {{$timestamp}}\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{dynamic_date}}\",\n  \"end_date\": \"{{dynamic_date}}\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 50,\n  \"booking_status\": \"pending\",\n  \"payment_status\": \"unpaid\",\n  \"notes\": \"Booking aktif agar delete venue menghasilkan 400.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 30;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('dynamic_date', `${yyyy}-${mm}-${dd}`);",
+                  "pm.collectionVariables.set('unique_suffix', String(Date.now()));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Booking created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('eventName'); });",
+                  "pm.collectionVariables.set('active_booking_id', String(json.id));",
+                  "console.log('active_booking_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Conflict Venue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Conflict Venue {{$timestamp}}\",\n  \"location\": \"Conflict Area\",\n  \"capacity\": 250,\n  \"facilities\": \"AC, Sound\",\n  \"price_per_day\": 3000000,\n  \"status\": \"available\",\n  \"description\": \"Venue untuk test jadwal bentrok.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('conflict_venue_id', String(json.id));",
+                  "console.log('conflict_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Base Conflict Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "Booking dasar. Request conflict akan memakai venue/tanggal ini.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{conflict_venue_id}},\n  \"event_name\": \"Postman Base Conflict Booking {{$timestamp}}\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{conflict_date}}\",\n  \"end_date\": \"{{conflict_date}}\",\n  \"start_time\": \"18:00\",\n  \"end_time\": \"23:00\",\n  \"attendees\": 80,\n  \"booking_status\": \"confirmed\",\n  \"payment_status\": \"paid\",\n  \"notes\": \"Booking dasar untuk memicu conflict.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 300;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('conflict_date', `${yyyy}-${mm}-${dd}`);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Booking created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('eventName'); });",
+                  "pm.collectionVariables.set('conflict_booking_id', String(json.id));",
+                  "console.log('conflict_booking_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Venues API Tests",
+      "item": [
+        {
+          "name": "GET All Venues - 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Response is array', () => pm.expect(json).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Venue by ID - 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{available_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{available_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue detail has bookings array', () => { pm.expect(json).to.have.property('bookings'); pm.expect(json.bookings).to.be.an('array'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search Venues - 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues?search=Postman",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Postman"
+                }
+              ]
+            },
+            "description": "Search by query search=Postman"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Response is array', () => pm.expect(json).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Update Venue - 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{available_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{available_venue_id}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Available Venue Updated\",\n  \"capacity\": 350,\n  \"price_per_day\": 2800000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue updated', () => { pm.expect(json.name).to.equal('Postman Available Venue Updated'); pm.expect(json.capacity).to.equal(350); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Venue Validation Error - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"location\": \"\",\n  \"capacity\": -5,\n  \"price_per_day\": -1000,\n  \"status\": \"invalid_status\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has validation message', () => pm.expect(json).to.have.property('message'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Venue with Active Booking - 400",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{active_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{active_venue_id}}"
+              ]
+            },
+            "description": "Venue ini dibuat di setup dan punya booking pending, jadi harus 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mentions active booking', () => pm.expect(String(json.message).toLowerCase()).to.include('booking aktif'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Disposable Venue for Delete",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Disposable Venue {{$timestamp}}\",\n  \"location\": \"Disposable Area\",\n  \"capacity\": 50,\n  \"facilities\": \"AC\",\n  \"price_per_day\": 750000,\n  \"status\": \"available\",\n  \"description\": \"Venue sementara untuk test DELETE success.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Venue created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('name'); });",
+                  "pm.collectionVariables.set('delete_venue_id', String(json.id));",
+                  "console.log('delete_venue_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Venue Success - 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{delete_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{delete_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Delete message', () => pm.expect(String(json.message)).to.include('berhasil dihapus'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Event Bookings API Tests",
+      "item": [
+        {
+          "name": "GET All Bookings - 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Response is array', () => pm.expect(json).to.be.an('array'));",
+                  "if (json.length > 0) { pm.test('Booking has venue relation', () => pm.expect(json[0]).to.have.property('venue')); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Booking Success - 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{available_venue_id}},\n  \"event_name\": \"Postman CRUD Booking {{$timestamp}}\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{dynamic_date}}\",\n  \"end_date\": \"{{dynamic_date}}\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 70,\n  \"booking_status\": \"pending\",\n  \"payment_status\": \"unpaid\",\n  \"notes\": \"Booking sukses untuk test CRUD.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 30;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('dynamic_date', `${yyyy}-${mm}-${dd}`);",
+                  "pm.collectionVariables.set('unique_suffix', String(Date.now()));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Booking created', () => { pm.expect(json).to.have.property('id'); pm.expect(json).to.have.property('eventName'); });",
+                  "pm.collectionVariables.set('crud_booking_id', String(json.id));",
+                  "console.log('crud_booking_id =', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Booking by ID - 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{crud_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{crud_booking_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Booking detail has venue', () => { pm.expect(json).to.have.property('venue'); pm.expect(json.venue).to.have.property('name'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Update Booking Status - 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{crud_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{crud_booking_id}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_status\": \"confirmed\",\n  \"payment_status\": \"paid\",\n  \"notes\": \"Booking sudah dikonfirmasi dan lunas.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Booking updated', () => { pm.expect(json.bookingStatus).to.equal('confirmed'); pm.expect(json.paymentStatus).to.equal('paid'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Booking Venue Not Available - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{maintenance_venue_id}},\n  \"event_name\": \"Postman Booking Maintenance Venue\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{dynamic_date}}\",\n  \"end_date\": \"{{dynamic_date}}\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 30;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('dynamic_date', `${yyyy}-${mm}-${dd}`);",
+                  "pm.collectionVariables.set('unique_suffix', String(Date.now()));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mentions unavailable venue', () => pm.expect(String(json.message).toLowerCase()).to.satisfy(m => m.includes('maintenance') || m.includes('tidak dapat') || m.includes('available')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Booking Exceeds Capacity - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{small_venue_id}},\n  \"event_name\": \"Postman Booking Over Capacity\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{dynamic_date}}\",\n  \"end_date\": \"{{dynamic_date}}\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"12:00\",\n  \"attendees\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 30;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('dynamic_date', `${yyyy}-${mm}-${dd}`);",
+                  "pm.collectionVariables.set('unique_suffix', String(Date.now()));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mentions capacity', () => pm.expect(String(json.message).toLowerCase()).to.include('kapasitas'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Booking Invalid Time - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{available_venue_id}},\n  \"event_name\": \"Postman Invalid Time\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{dynamic_date}}\",\n  \"end_date\": \"{{dynamic_date}}\",\n  \"start_time\": \"14:00\",\n  \"end_time\": \"09:00\",\n  \"attendees\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();",
+                  "const dayOffset = Math.floor(Math.random() * 250) + 30;",
+                  "const date = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);",
+                  "const yyyy = date.getUTCFullYear();",
+                  "const mm = String(date.getUTCMonth() + 1).padStart(2, '0');",
+                  "const dd = String(date.getUTCDate()).padStart(2, '0');",
+                  "pm.collectionVariables.set('dynamic_date', `${yyyy}-${mm}-${dd}`);",
+                  "pm.collectionVariables.set('unique_suffix', String(Date.now()));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mentions time', () => pm.expect(String(json.message).toLowerCase()).to.include('waktu'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Booking Schedule Conflict - 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings"
+              ]
+            },
+            "description": "Harus memakai tanggal yang sama dengan base conflict booking. Namun dynamic_date bisa berubah oleh test lain. Karena itu collection ini menjalankan ulang pre-request untuk set conflict_date? We'll adjust.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venue_id\": {{conflict_venue_id}},\n  \"event_name\": \"Postman Conflict Attempt\",\n  \"organizer_name\": \"Postman Runner\",\n  \"start_date\": \"{{conflict_date}}\",\n  \"end_date\": \"{{conflict_date}}\",\n  \"start_time\": \"19:00\",\n  \"end_time\": \"21:00\",\n  \"attendees\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mentions conflict', () => pm.expect(String(json.message).toLowerCase()).to.include('bentrok'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Booking Success - 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{crud_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{crud_booking_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Delete message', () => pm.expect(String(json.message)).to.include('berhasil dihapus'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "99 - Cleanup Optional",
+      "description": "Opsional. Jalankan di akhir demo untuk membersihkan data Postman. Beberapa cleanup boleh 200 atau 404 agar tetap aman kalau data sudah pernah dihapus.",
+      "item": [
+        {
+          "name": "Delete Active Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{active_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{active_booking_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Conflict Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-bookings/{{conflict_booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "event-bookings",
+                "{{conflict_booking_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Available Venue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{available_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{available_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Maintenance Venue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{maintenance_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{maintenance_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Small Capacity Venue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{small_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{small_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Active Venue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{active_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{active_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Conflict Venue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/venues/{{conflict_venue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "venues",
+                "{{conflict_venue_id}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is one of [200, 404, 400]', () => pm.expect([200, 404, 400]).to.include(pm.response.code));",
+                  "pm.test('Cleanup response is acceptable', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
