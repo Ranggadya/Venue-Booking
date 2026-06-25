@@ -37,7 +37,7 @@ Satu venue dapat memiliki banyak event booking, sedangkan satu event booking han
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### Authentication
 
@@ -82,7 +82,7 @@ Satu venue dapat memiliki banyak event booking, sedangkan satu event booking han
 
 ---
 
-## 🖥️ Screenshots
+## Screenshots
 
 ### Login Page
 
@@ -126,7 +126,7 @@ Satu venue dapat memiliki banyak event booking, sedangkan satu event booking han
 
 ---
 
-## 🧩 ERD
+## ERD
 
 ![ERD](./public/erd.svg)
 
@@ -177,7 +177,7 @@ Ref: event_bookings.venue_id > venues.id
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 ### Runtime & Language
 
@@ -409,7 +409,7 @@ http://localhost:3000
 
 ---
 
-## 🌐 Akses Aplikasi
+## Akses Aplikasi
 
 | URL | Keterangan |
 |---|---|
@@ -420,7 +420,7 @@ http://localhost:3000
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 Semua endpoint API selain login membutuhkan header:
 
@@ -662,29 +662,6 @@ Lalu jalankan ulang aplikasi:
 ```bash
 npm run start:dev
 ```
-
----
-
-## 🎥 Video Demo
-
-Link video demo:
-
-```txt
-Tambahkan link video Loom/YouTube di sini
-```
-
-Suggested demo flow:
-
-1. Perkenalan project dan tech stack
-2. Login admin
-3. Dashboard overview
-4. CRUD venue
-5. Detail venue dan relasi booking
-6. CRUD event booking
-7. Validasi kapasitas
-8. Validasi venue maintenance/inactive
-9. Validasi jadwal bentrok
-10. API testing via Postman dengan JWT
 
 ---
 
