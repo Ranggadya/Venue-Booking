@@ -128,8 +128,6 @@ Satu venue dapat memiliki banyak event booking, sedangkan satu event booking han
 
 ## 🧩 ERD
 
-ERD dapat dibuat menggunakan [dbdiagram.io](https://dbdiagram.io).
-
 ![ERD](./public/erd.svg)
 
 ### DBML Schema
@@ -232,30 +230,6 @@ Ref: event_bookings.venue_id > venues.id
 
 ---
 
-## 🏗️ Arsitektur
-
-```txt
-Browser / Postman
-        │
-        ▼
-┌──────────────────────────────────────┐
-│           NestJS Application          │
-│                                      │
-│  ┌────────────────┐ ┌──────────────┐ │
-│  │ Page Controller│ │ API Controller│ │
-│  │ SSR / EJS      │ │ JSON / REST   │ │
-│  └───────┬────────┘ └──────┬───────┘ │
-│          │                 │         │
-│          └────────┬────────┘         │
-│                   ▼                  │
-│             Service Layer            │
-│      Business Logic & Validation     │
-│                   │                  │
-│                   ▼                  │
-│              Prisma Client           │
-└───────────────────┼──────────────────┘
-                    ▼
-              PostgreSQL Database
 ```
 
 ### MVC Mapping
@@ -269,7 +243,7 @@ Browser / Postman
 
 ---
 
-## 📁 Struktur Folder
+## Struktur Folder
 
 ```txt
 venue-booking/
@@ -328,7 +302,7 @@ venue-booking/
 
 ---
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 ### Prasyarat
 
@@ -425,7 +399,7 @@ http://localhost:3000
 
 ---
 
-## 🔐 Demo Account
+## Demo Account
 
 | Role | Email | Password |
 |---|---|---|
@@ -531,7 +505,7 @@ Contoh request `POST /api/event-bookings`:
 
 ---
 
-## 🧪 Postman Testing
+## Postman Testing
 
 Project ini menyediakan Postman Collection untuk testing API.
 
@@ -570,7 +544,7 @@ http://localhost:3000
 
 ---
 
-## 📏 Aturan Bisnis
+## Aturan Bisnis
 
 ### Venue Rules
 
@@ -607,7 +581,7 @@ Artinya sistem mengecek overlap berdasarkan **range tanggal** dan **range waktu*
 
 ---
 
-## 🧯 Error Handling
+## Error Handling
 
 Semua error ditangani oleh global exception filter.
 
@@ -635,7 +609,7 @@ Contoh response error API:
 
 ---
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 ### Halaman Admin
 
@@ -661,7 +635,7 @@ POST /api/auth/login
 
 ---
 
-## 🧾 Available Scripts
+## Available Scripts
 
 | Script | Fungsi |
 |---|---|
@@ -675,7 +649,7 @@ POST /api/auth/login
 
 ---
 
-## 🧼 Reset Database
+## Reset Database
 
 Jika data testing sudah berubah atau ID seed tidak sesuai, reset database dengan:
 
@@ -714,7 +688,7 @@ Suggested demo flow:
 
 ---
 
-## 📌 Scope & Limitations
+## Scope & Limitations
 
 ### In Scope
 
@@ -744,7 +718,7 @@ Suggested demo flow:
 
 ---
 
-## 👤 Author
+## Author
 
 **Ranggadya Aditama Ramadhani**
 
@@ -752,7 +726,3 @@ Suggested demo flow:
 - LinkedIn: [Ranggadya Aditama Ramadhani](https://www.linkedin.com/in/ranggadya/)
 
 ---
-
-## 📄 License
-
-Project ini dibuat untuk kebutuhan portfolio dan challenge fullstack TypeScript.
